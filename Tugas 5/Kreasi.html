@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lempar</title>  
+    <canvas id="canvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+
+    <script src="utils.js"></script>
+    <script src="bola.js"></script>
+</head>
+<body>
+    <textarea id="log"></textarea>
+<p></p>
+<p id="holdStatus" color="white">Mouse tidak di hold.</p>
+
+<script>
+    window.onload=function(){
+        var canvas=document.getElementById('canvas'),
+            context=canvas.getContext('2d'),
+            log = document.getElementById('log'),
+            mouse=utils.captureMouse(canvas),
+            jarak=0,
+            deltaX=0,
+            deltaY=0,
+            mouseDitekan=false,
+            bounce=-0.8,
+            oldX,oldY;
+
+        var bolaG=new Bola(20,"#ffff00");
+        bolaG.x = canvas.width/2;
+        bolaG.y = canvas.height/2;
+        bolaG.draw(context);
+
+        var bolaR=new Bola(15,"#ff0000");
+        bolaR.x = canvas.width/4;
+        bolaR.y = canvas.height/4;
+        bolaR.draw(context);
+
+        canvas.addEventListener('mousedown',function(){
+            jarak=Math.sqrt(deltaX*deltaX+deltaY*deltaY);
+            if (jarak<=bolaG.radius){
+                canvas.addEventListener('mouseup',fsMouseUp, false);
+                canvas.addEventListener('mousemove',fsMouseMove,false);
+
+                oldX=bolaG.x;
+                oldY=bolaG.y;
+                mouseDitekan=true;
+            }
+        },false);
+
+        function fsMouseUp(){
+            canvas.removeEventListener('mouseup',fsMouseUp, false);
+            canvas.removeEventListener('mousemove',fsMouseMove,false);
+            mouseDitekan=false;
+
+            if (mouseDitekan) {
+                bolaG.vx = (bolaG.x - oldX) * 2; 
+                bolaG.vy = (bolaG.y - oldY) * 2;
+            }
+        };
+
+        function fsMouseMove(event){
+            bolaG.x=mouse.x;
+            bolaG.y=mouse.y;
+            bolaG.draw(context);
+            bolaR.draw(context);
+        };
+
+        function drawFrame(){
+            window.requestAnimationFrame(drawFrame,canvas);
+            context.clearRect(0,0,canvas.width,canvas.height);
+            if(mouseDitekan){
+                bolaG.vx=(bolaG.x-oldX);
+                bolaG.vy=(bolaG.y-oldY);
+                oldX=bolaG.x;
+                oldY=bolaG.y;
+            }
+            bolaG.x+=bolaG.vx;
+            bolaG.y+=bolaG.vy;
+
+            if(bolaG.x > canvas.width - bolaG.radius){
+                bolaG.x=canvas.width - bolaG.radius;
+                bolaG.vx*=bounce;
+            }
+            else if(bolaG.x < bolaG.radius){
+                bolaG.x= bolaG.radius;
+                bolaG.vx*=bounce;
+            }
+            if(bolaG.y > canvas.height- bolaG.radius){
+                bolaG.y=canvas.height - bolaG.radius;
+                bolaG.vy*=bounce;
+            }
+            else if(bolaG.y < bolaG.radius){
+                bolaG.y= bolaG.radius;
+                bolaG.vy*=bounce;
+            }
+            
+            // Deteksi tabrakan antara bolaG dan bolaR
+            var dx = bolaG.x - bolaR.x;
+            var dy = bolaG.y - bolaR.y;
+            var distance = Math.sqrt(dx * dx + dy * dy);
+            log.value = '';
+            if (distance < bolaG.radius + bolaR.radius) {
+                log.value = "Hit!";
+                // Menghitung sudut tabrakan
+                var angle = Math.atan2(dy, dx);
+                // Menyimpan kecepatan sebelum tabrakan
+                var vGx = bolaG.vx;
+                var vGy = bolaG.vy;
+                var vRx = bolaR.vx;
+                var vRy = bolaR.vy;
+                // Menghitung kecepatan setelah tabrakan dengan mempertahankan momentum dan energi kinetik
+                var vG = Math.sqrt(vGx * vGx + vGy * vGy);
+                var vR = Math.sqrt(vRx * vRx + vRy * vRy);
+                var dirG = Math.atan2(vGy, vGx);
+                var dirR = Math.atan2(vRy, vRx);
+                var newVGx = vR * Math.cos(dirR - angle);
+                var newVGy = vR * Math.sin(dirR - angle);
+                var newVRx = vG * Math.cos(dirG - angle);
+                var newVRy = vG * Math.sin(dirG - angle);
+                // Mengatur kecepatan baru setelah tabrakan
+                bolaG.vx = Math.cos(angle) * newVGx + Math.cos(angle + Math.PI / 2) * newVGy;
+                bolaG.vy = Math.sin(angle) * newVGx + Math.sin(angle + Math.PI / 2) * newVGy;
+                bolaR.vx = Math.cos(angle) * newVRx + Math.cos(angle + Math.PI / 2) * newVRy;
+                bolaR.vy = Math.sin(angle) * newVRx + Math.sin(angle + Math.PI / 2) * newVRy;
+                // Menyesuaikan posisi agar bolaG tidak menembus bolaR
+                var overlap = bolaG.radius + bolaR.radius - distance;
+                var adjustX = overlap * Math.cos(angle);
+                var adjustY = overlap * Math.sin(angle);
+                bolaG.x += adjustX;
+                bolaG.y += adjustY;
+            }
+            
+            bolaG.draw(context);
+            bolaR.draw(context);
+        
+        };
+        drawFrame(); 
+    };
+</script>
+
+</body>
+</html>

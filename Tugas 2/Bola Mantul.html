@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bola Bolak-balik Menggunakan Sinus</title>
+    <style>
+        canvas {
+            border: 1px solid #d3d3d3;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="myCanvas" width="400" height="200"></canvas>
+
+<script>
+    var canvas = document.getElementById("myCanvas");
+    var ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#00ff00";
+    
+    var ball = {
+        x: canvas.width, // posisi awal x
+        y: 10, // posisi awal y
+        radius: 10, // radius bola
+        draw: function(ctx) {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    };
+    heightt = canvas.height;
+    widthh = canvas.width;
+    nyentuhAtas = 0;
+    var sudut = 0; // sudut awal
+    setInterval(gambarFrame, 10);
+    aha = 5
+    function gambarFrame() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ball.x = heightt;
+        ball.y = widthh - aha;
+        grafitasi(aha)
+        ball.draw(ctx);
+        if (ball.y === 5){
+            nyentuhAtas = 1
+        } 
+        if (ball.y === heightt - 10){
+            nyentuhAtas = 0;
+        }
+       
+    }
+
+    function grafitasi(aha){
+        if (nyentuhAtas === 0){
+            this.aha = aha + 5;
+            this.widthh -= 5;
+        }
+        else {
+            this.aha = aha - 5;
+        }
+    }
+</script>
+
+</body>
+</html>

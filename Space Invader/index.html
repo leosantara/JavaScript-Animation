@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROJECT</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <canvas id="myCanvas" width="500" height="500"></canvas>
+        <textarea id="log"></textarea>
+    </div>
+    <script src="utils.js"></script>
+    <script src="plane.js"></script>
+    <script src="bullet.js"></script>
+    <script src="alien.js"></script>
+    <script>
+        
+        var canvas = document.getElementById("myCanvas"),
+            context = canvas.getContext('2d'),
+            myplane = new Plane(25, "#0x00fff0");
+            easing = 0.05;
+            bullets=[];
+            aliens=[];  
+            powerups = [];
+            tile = 30;
+            column = 3;
+            row = 2;
+            gameOver = false;
+            doubleBullets = false;
+
+        myplane.x = canvas.width / 2;
+        myplane.y = 450;
+
+
+        
+
+         // Panggil keyboardControls function from utils.js
+        keyboardControl();
+
+        function createPowerup() {
+            var powerup = {
+                x: Math.random() * canvas.width,
+                y: 0,
+                radius: 10,
+                vy: 2,
+                draw: function(ctx) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = "#FFD7F0";
+                    ctx.fill();
+                    ctx.closePath();
+
+                    
+                }
+                
+                ,
+                update: function() {
+                    this.y += this.vy;
+                }
+            };
+            powerups.push(powerup);
+        }
+
+        function shoot() {
+            bullet1 = new Bullet(10, "#FF0000"); 
+            bullet1.vx = 0; 
+            bullet1.vy = -10;
+            bullet1.x = myplane.x- 10;            
+            bullet1.y = myplane.y;
+
+            if (doubleBullets) {
+                var bullet2 = new Bullet(10, "#FF0000");
+                bullet2.vx = 0;
+                bullet2.vy = -10;
+                bullet2.x = myplane.x + 10; // Bullet kedua sedikit bergeser ke kanan
+                bullet2.y = myplane.y;
+                bullets.push(bullet2);
+            }
+
+            bullets.push(bullet1);
+        }
+
+        
+        for(var i = 0; i < column; i++){
+            for(var j = 0; j < row ; j++){
+                alien = new Alien(25,25, "#6CC417"); 
+                alien.x = tile + i*tile;            
+                alien.y = tile + j*tile;
+                alien.vx = 1; 
+                alien.vy = 3;
+                alien.alive =  true;
+                aliens.push(alien);
+            }
+        }
+
+
+        function drawAlien(){
+            for(var i =0; i < aliens.length; i++){
+                alien = aliens[i];
+                if(alien.alive){
+                    alien.x += alien.vx;
+                    alien.x += alien.vx;
+                
+                    if(alien.x + alien.width >= canvas.width || alien.x <= 0){
+                        alien.vx *= -1;
+                        alien.x += alien.vx;
+
+                        for(var j = 0; j < aliens.length; j++){
+                            aliens[j].y += alien.vy;
+            
+                        }
+                    }
+                    alien.draw(context);
+
+                    if(alien.y >= myplane.y){
+                        gameOver = true;
+                    }
+                    var distX = Math.abs(myplane.x - alien.x - alien.width / 2);
+                    var distY = Math.abs(myplane.y - alien.y - alien.height / 2);
+                    if(distX <= (alien.width / 2 + myplane.radius) && distY <= (alien.height / 2 + myplane.radius)){
+                        gameOver = true;
+                    }
+                }
+                alien.draw(context);
+            }
+        }
+
+        function hitAlien(){
+            for (var i = 0; i < bullets.length; i++){
+                var bullet = bullets[i];
+                for (var j = 0; j < aliens.length; j++){
+                    var alien = aliens[j]; 
+                    var distX = Math.abs(bullet.x - alien.x - alien.width / 2);
+                    var distY = Math.abs(bullet.y - alien.y - alien.height / 2);
+                    if(distX <= (alien.width / 2 + bullet.radius) && distY <= (alien.height / 2 + bullet.radius)){
+                        bullet.used = true;
+                        alien.alive = false;
+                        bullets.splice(i,1);
+                        aliens.splice(j,1);
+                        break
+                    }
+                }
+            }
+        }
+
+        function hitPowerup() {
+            for (var i = 0; i < powerups.length; i++) {
+                var powerup = powerups[i];
+                var distX = Math.abs(myplane.x - powerup.x);
+                var distY = Math.abs(myplane.y - powerup.y);
+                if (distX <= (myplane.radius + powerup.radius) && distY <= (myplane.radius + powerup.radius)) {
+                    powerups.splice(i, 1);
+                    doubleBullets = true;
+                    break;
+                }
+            }
+        }
+
+        // function nextLevel(){
+        //     if(aliens.length == 0){
+        //         bullets.splice(0,bullets.length);
+        //         column += 2;
+        //         row += 2;
+        //         alien.vx += 2;
+        //         drawAlien(); 
+        //     }
+        // }
+
+        function isGameOver(){
+            if(gameOver){
+                log.value('GAME OVER');
+            }
+        }
+
+        function draw(bullet){
+            bullet.x += bullet.vx;
+            bullet.y += bullet.vy;
+            bullet.draw(context)
+        }
+
+        document.addEventListener('keyup', function(event) {
+            if (event.key === ' ') { // Tombol spasi untuk menembak
+                shoot();
+            }
+        });
+        myplane.draw(context);
+
+        function drawFrame(){
+            window.requestAnimationFrame(drawFrame, canvas);
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            myplane.vx = ax; // menetapkan kecepatan bola berdasarkan ax
+            myplane.vy = ay; // menetapkan kecepatan bola berdasarkan ay
+            myplane.x = Math.max(myplane.radius, Math.min(myplane.x, canvas.width-myplane.radius))
+            myplane.x += myplane.vx;
+            myplane.y += myplane.vy;
+            bullets.forEach(draw)
+            myplane.draw(context);
+            drawAlien();
+            hitAlien();
+            // nextLevel();
+            hitPowerup();
+            isGameOver();
+            console.log(aliens.length)
+
+            // Update and draw powerups
+            powerups.forEach(function(powerup) {
+                powerup.update();
+                powerup.draw(context);
+            });
+
+            // Remove powerups that are out of the screen
+            powerups = powerups.filter(function(powerup) {
+                return powerup.y <= canvas.height;
+            });
+
+            // Create a new powerup randomly
+            if (Math.random() < 0.01) {
+                createPowerup();
+            }
+    
+        };
+        drawFrame();
+        
+
+    </script>
+</body>
+</html>

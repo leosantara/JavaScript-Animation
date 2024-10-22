@@ -1,0 +1,28 @@
+<canvas id="canvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+
+<script src="bola.js"></script>
+<script src="utils.js"></script>
+<script>
+    window.onload=function(){
+        var canvas=document.getElementById('canvas'),
+        context=canvas.getContext('2d'),
+        bolaG=new Bola(10,"#00ff00"),
+        mouse=utils.captureMouse(canvas),
+        kecepatan=6;
+        bolaG.x=canvas.width/2;
+        bolaG.y=canvas.height/2;
+        bolaG.draw(context);
+        setInterval(gambarFrame,1000/60);
+        function gambarFrame(){
+            context.clearRect(0,0,canvas.width,canvas.height);
+            var dx=mouse.x - bolaG.x;
+            dy=mouse.y - bolaG.y;
+            angle=Math.atan2(dy,dx);
+            bolaG.vx=kecepatan*Math.cos(angle);
+            bolaG.vy=kecepatan*Math.sin(angle);
+            bolaG.x +=bolaG.vx;
+            bolaG.y +=bolaG.vy;
+            bolaG.draw(context);
+        }
+    }
+</script>

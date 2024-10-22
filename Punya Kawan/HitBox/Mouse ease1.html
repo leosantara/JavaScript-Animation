@@ -1,0 +1,46 @@
+<canvas id="canvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+<textarea id="log"></textarea>
+
+<script src="bola.js"></script>
+<script src="utils.js"></script>
+<script>
+
+    window.onload = function () {
+        var canvas = document.getElementById('canvas'),
+            context = canvas.getContext('2d'),
+            mouse = utils.captureMouse(canvas),
+            log = document.getElementById('log'),
+            ballA = new Bola(30, "#ff0000"),
+            ballB = new Bola(30, "#ff0000");
+
+        ballA.x = canvas.width / 2;
+        ballA.y = canvas.height / 2;
+
+        canvas.addEventListener('mousemove', drawFrame, false);
+        drawFrame();
+
+        function drawFrame() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            ballB.x = mouse.x;
+            ballB.y = mouse.y;
+
+            var dx = ballB.x - ballA.x,
+                dy = ballB.y - ballA.y,
+                dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 60) {
+                log.value = "Hit!";
+                ballA.radius += 10;
+                
+            } else {
+                log.value = '';
+                ballA.draw(context);
+                ballB.draw(context);
+            }
+
+        }
+    };
+
+
+</script>

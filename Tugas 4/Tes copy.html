@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lempar</title>  
+    <canvas id="canvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+
+    <script src="utils.js"></script>
+    <script src="bola.js"></script>
+</head>
+<body>
+
+<p></p>
+<p id="holdStatus" color="white">Mouse tidak di hold.</p>
+
+<script>
+    window.onload=function(){
+        var canvas=document.getElementById('canvas'),
+            context=canvas.getContext('2d'),
+            log = document.getElementById('log'),
+            mouse=utils.captureMouse(canvas),
+            jarak=0,
+            deltaX=0,
+            deltaY=0,
+            mouseDitekan=false,
+            bounce=-0.8,
+            oldX,oldY;
+
+        var bolaG=new Bola(20,"#ffff00");
+        bolaG.x = canvas.width/4;
+        bolaG.y = canvas.height/2;
+        bolaG.draw(context);
+        var bolaF=new Bola(10,"#ffffff");
+        bolaF.x = canvas.width/2;
+        bolaF.y = canvas.height/2;
+        bolaF.draw(context);
+        var MaxTujuan = 50;
+        var pindah = 10
+        var cek = 0
+        setInterval(drawFrame,1000)
+        function drawFrame(){
+            window.requestAnimationFrame(drawFrame,canvas);
+            context.clearRect(0,0,canvas.width,canvas.height);
+            
+            bolaG.x += pindah;
+            cek += 1;
+            if (cek == MaxTujuan){
+                
+                MaxTujuan -= pindah;
+                pindah = -1 * pindah
+                cek = 0
+                               
+            }
+            // if(mouseDitekan){
+            //     bolaG.vx=(bolaG.x-oldX);
+            //     bolaG.vy=(bolaG.y-oldY);
+            //     oldX=bolaG.x;
+            //     oldY=bolaG.y;
+            // }
+            // bolaG.x+=bolaG.vx;
+            // bolaG.y+=bolaG.vy;
+
+            // if(bolaG.x > canvas.width - bolaG.radius){
+            //     bolaG.x=canvas.width - bolaG.radius;
+            //     bolaG.vx*=bounce;
+        
+            // }
+            // else if(bolaG.x < bolaG.radius){
+            //     bolaG.x= bolaG.radius;
+            //     bolaG.vx*=bounce;
+            // }
+            // if(bolaG.y > canvas.height- bolaG.radius){
+            //     bolaG.y=canvas.height - bolaG.radius;
+            //     bolaG.vy*=bounce;
+            // }
+            // else if(bolaG.y < bolaG.radius){
+            //     bolaG.y= bolaG.radius;
+            //     bolaG.vy*=bounce;
+            // }
+           
+            bolaG.draw(context);
+            bolaF.draw(context);
+            
+         
+        };
+        drawFrame(); 
+    };
+</script>
+
+</body>
+</html>

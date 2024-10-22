@@ -1,0 +1,25 @@
+<canvas id="canvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+
+<script src="utils.js"></script>
+<script src="bola.js"></script>
+<script>
+window.onload=function(){
+    var canvas=document.getElementById('canvas'),
+    context=canvas.getContext('2d'),
+    bolaB=new Bola(10,0x0000ff); 
+    bolaB.x=canvas.width/2;
+    bolaB.y=canvas.height/2;
+    bolaB.draw(context);
+    bolaB.vx=1;
+    // bolaB.ax=0.1;
+    (function drawFrame(){
+        window.requestAnimationFrame(drawFrame,canvas);
+        context.clearRect(0,0,canvas.width,canvas.height);
+        // bolaB.vx+=bolaB.ax;
+        bolaB.x +=bolaB.vx;
+        
+        bolaB.draw(context);
+        if (bolaB.x>=canvas.width) {bolaB.x=0};
+    }());
+};
+</script>

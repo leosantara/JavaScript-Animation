@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Kotak</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <canvas id="canvas" width="400" height="400" style="border:1px solid #000000;"></canvas>
+    <textarea id="log"></textarea>
+
+
+    <script src="utils2.js"></script>
+    <script src="bola2.js"></script>
+    <script>
+    window.onload = function () {
+      var canvas = document.getElementById('canvas'),
+          context = canvas.getContext('2d'),
+          log = document.getElementById('log'),
+          mouse = utils.captureMouse(canvas),
+          ballA = new Box(),
+          ballB = new Box();
+
+      ballA.x = canvas.width / 2;
+      ballA.y = canvas.height / 2;
+
+      (function drawFrame () {
+        window.requestAnimationFrame(drawFrame, canvas);
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        ballB.x = mouse.x;
+        ballB.y = mouse.y;
+
+        if (utils.intersects(ballA.getBounds(), ballB.getBounds())) {
+          log.value = "Hit!";
+        } else {
+          log.value = '';
+        }
+        ballA.draw(context);
+        ballB.draw(context);
+
+        //draw bounding boxes
+        var boundsA = ballA.getBounds(),
+            boundsB = ballB.getBounds();
+
+        context.strokeRect(boundsA.x, boundsA.y, boundsA.width, boundsA.height);
+        context.strokeRect(boundsB.x, boundsB.y, boundsB.width, boundsB.height);
+      }());
+    };
+    </script>
+  </body>
+</html>

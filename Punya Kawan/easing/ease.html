@@ -1,0 +1,31 @@
+<canvas id="canvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+<textarea id="log"></textarea>
+
+<script src="bola.js"></script>
+<script src="utils.js"></script>
+<script>
+    window.onload = function () {
+        var canvas = document.getElementById('canvas'),
+            context = canvas.getContext('2d'),
+            bolaTarget = new Bola(10, 0x00ff00),
+            bolaG = new Bola(20, "#00ff00"),
+            easing = 0.04;
+        bolaTarget.x = canvas.width / 2;
+        bolaTarget.y = canvas.height / 2;
+        bolaG.x = 0;
+        bolaG.y = canvas.height / 4;
+        bolaTarget.draw(context);
+        (function drawFrame() {
+            window.requestAnimationFrame(drawFrame, canvas);
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            bolaG.vx = (bolaTarget.x - bolaG.x) * easing;
+            bolaG.vy = (bolaTarget.y - bolaG.y) * easing;
+            bolaG.x += bolaG.vx;
+            bolaG.y += bolaG.vy;
+            log.value = "bola.vx= " + bolaG.vx;
+            bolaG.draw(context);
+            bolaTarget.draw(context);
+        }());
+    };
+
+</script>

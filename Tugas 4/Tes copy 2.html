@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>hah</title>  
+    <canvas id="canvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+
+    <script src="utils.js"></script>
+    <script src="bola.js"></script>
+</head>
+<body>
+
+<script>
+  window.onload=function () {
+
+    var canvas=document.getElementById('canvas'),
+    context=canvas.getContext('2d'),
+    bolaTarget=new bola(10,0x00ff00),
+    bolaR=new bola(15,0xff0000),
+    log = document.getElementById('log'),
+    easing=0.05;
+    bolaTarget.x=canvas.width/2;
+    bolaTarget.y=canvas.height/2;
+    bolaR.x=0;
+    bolaR.y=canvas.height/2;
+    bolaTarget.draw(context);
+    (function drawFrame() {
+        window.requestAnimationFrame(drawFrame,canvas);
+        context.clearRect(0,0,canvas.width,canvas.height);
+        bolaR.vx=(bolaTarget.x-bolaR.x)*easing;
+        bolaR.vy=(bolaTarget.y-bolaR.y)*easing;
+        bolaR.x +=bolaR.vx;
+        bolaR.y +=bolaR.vy;
+        log.value="bola.vx= "+bolaR.vx;
+        bolaR.draw(context);
+        bolaTarget.draw(context);
+    }());
+    }
+</script>
+
+</body>
+</html>

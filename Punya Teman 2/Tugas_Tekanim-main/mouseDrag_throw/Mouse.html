@@ -1,0 +1,55 @@
+<canvas id="canvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+<textarea id="log"></textarea>
+
+<script src="bola.js"></script>
+<script src="utils.js"></script>
+<script>
+    window.onload = function () {
+        var canvas = document.getElementById('canvas'),
+            context = canvas.getContext('2d'),
+            bolaG = new Bola(20, "#00ff00"),
+            mouse = utils.captureMouse(canvas),
+            jarak = 0;
+        deltaX = 0;
+        deltaY = 0;
+        bolaG.x = canvas.width / 2;
+        bolaG.y = canvas.height / 2;
+        bolaG.draw(context);
+        canvas.addEventListener('mousedown', function () {
+            deltaX = mouse.x - bolaG.x;
+            deltaY = mouse.y - bolaG.y;
+            jarak = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            if (jarak <= bolaG.radius) {
+                canvas.addEventListener('mouseup', fsMouseUp, false);
+                canvas.addEventListener('mousemove', fsMouseMove, false);
+                log.value = "posisi bolaG.x: " + String(bolaG.x);
+            }
+        }, false);
+        function fsMouseUp() {
+            canvas.removeEventListener('mouseup', fsMouseUp, false);
+            canvas.removeEventListener('mousemove', fsMouseMove, false);
+        };
+        function fsMouseMove(event) {
+            bolaG.x = mouse.x;
+            bolaG.y = mouse.y;
+            bolaG.draw(context);
+            log.value = "posisi mouse.x: " + String(mouse.x);
+        };
+        (function drawFrame() {
+            window.requestAnimationFrame(drawFrame, canvas);
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            bolaG.draw(context);
+            if (bolaG.x + bolaG.radius > right) {
+                bolaG.x = right - bolaG.radius;
+            } else if (bolaG.x - bolaG.radius < left) {
+                bolaG.x = left + bolaG.radius;
+            }
+            if (bolaG.y + bolaG.radius > bottom) {
+                bolaG.y = bottom - bolaG.radius;
+            } else if (bolaG.y - bolaG.radius < top) {
+                bolaG.y = top + bolaG.radius;   
+            }
+        }());
+    };
+
+</script>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kreasi</title>  
+    <canvas id="canvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+
+    <script src="utils.js"></script>
+    <script src="bola.js"></script>
+</head>
+<body>
+
+<p></p>
+<p id="holdStatus" color="white">Mouse tidak di hold.</p>
+
+<script>
+    window.onload=function(){
+        var canvas=document.getElementById('canvas'),
+            context=canvas.getContext('2d'),
+            bolaG=new Bola(30,"#ffff00");
+        var deltaX=0;
+        var deltaY = 0;
+        var jarak=0;
+        var isMouseHold = false; // Mendeklarasikan variabel isMouseHold di sini
+
+        bolaG.x=canvas.width/2;
+        bolaG.y=canvas.height/2;
+        bolaG.draw(context);
+        mouse=utils.captureMouse(canvas);
+
+        // Event listener saat tombol mouse ditekan
+        document.addEventListener("mousedown", function(event) {
+            if (event.button === 0) { // Cek jika tombol kiri mouse ditekan               
+                isMouseHold = true; // Set variabel isMouseHold ke true
+                updateHoldStatus();
+                deltaX = mouse.x - bolaG.x; // Mendeklarasikan deltaX di sini
+                deltaY = mouse.y - bolaG.y; // Mendeklarasikan deltaY di sini
+                jarak = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                if (jarak <= bolaG.radius) {
+                    canvas.addEventListener('mouseup', fsMouseUp, false);
+                    canvas.addEventListener('mousemove', fsMouseMove, false);
+                    oldX = bolaG.x;
+                    oldY = bolaG.y;
+                    isMouseHold = true;
+                }
+            }
+        }, false);
+
+        // Event listener saat tombol mouse dilepas
+        document.addEventListener("mouseup", function(event) {
+            if (event.button === 0) { // Cek jika tombol kiri mouse dilepas
+                isMouseHold = false; // Set variabel isMouseHold ke false
+                updateHoldStatus();
+            }
+        });
+
+        // Fungsi untuk memperbarui status hold pada halaman
+        function updateHoldStatus() {
+            var holdStatus = document.getElementById("holdStatus");
+            if (isMouseHold) {
+                holdStatus.textContent = "Mouse di hold.";
+            } else {
+                holdStatus.textContent = "Mouse tidak di hold.";
+            }
+        }
+
+        function fsMouseUp() {
+            canvas.removeEventListener('mouseup', fsMouseUp, false);
+            canvas.removeEventListener('mousemove', fsMouseMove, false);
+        }
+
+        function fsMouseMove(event) {
+            bolaG.x = mouse.x;
+            bolaG.y = mouse.y;
+            bolaG.draw(context);
+        
+        }
+    };
+
+    function drawFrame() {
+        window.requestAnimationFrame(drawFrame, canvas);
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.beginPath();
+        if (mouseDitekan) {
+            bolaG.vx = (bolaG.x - oldX);
+            bolaG.vy = (bolaG.y - oldY);
+            oldX = bolaG.x;
+            oldY = bolaG.y;
+        }
+        bolaG.x += bolaG.vx;
+        bolaG.y += bolaG.vy;
+
+        if (bolaG.x > canvas.width - bolaG.radius) {
+            bolaG.x = canvas.width - bolaG.radius;
+            bolaG.vx *= bounce;
+        } else if (bolaG.x < bolaG.radius) {
+            bolaG.x = bolaG.radius;
+            bolaG.vx *= bounce;
+        }
+        if (bolaG.y > canvas.height - bolaG.radius) {
+            bolaG.y = canvas.height - bolaG.radius;
+            bolaG.vy *= bounce;
+        } else if (bolaG.y < bolaG.radius) {
+            bolaG.y = bolaG.radius;
+            bolaG.vy *= bounce;
+        }
+        bolaG.draw(context);
+    }
+
+</script>
+
+</body>
+</html>

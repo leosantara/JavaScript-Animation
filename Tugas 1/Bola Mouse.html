@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bola yang Mengikuti Kursor Mouse dengan Delay</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="myCanvas" width="600" height="400"></canvas>
+
+    <script>
+        var canvas = document.getElementById("myCanvas");
+        var ctx = canvas.getContext("2d");
+        var delay = 100; // Delay dalam milidetik
+        var ballRadius = 10;
+        var x = canvas.width / 2;
+        var y = canvas.height / 2;
+
+        // Fungsi untuk menggambar bola pada koordinat tertentu
+        function drawBall(x, y) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Membersihkan canvas
+            ctx.beginPath();
+            ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // Fungsi untuk mendapatkan posisi kursor mouse
+        function getMousePos(canvas, evt) {
+            var rect = canvas.getBoundingClientRect();
+            return {
+                x: evt.clientX - rect.left,
+                y: evt.clientY - rect.top
+            };
+        }
+
+        // Event listener untuk mendapatkan posisi kursor mouse dan menggambar bola sesuai posisi tersebut
+        canvas.addEventListener('mousemove', function(evt) {
+            setTimeout(function() {
+                var mousePos = getMousePos(canvas, evt);
+                drawBall(mousePos.x, mousePos.y);
+            }, delay);
+        }, false);
+    </script>
+</body>
+</html>

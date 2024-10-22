@@ -1,0 +1,189 @@
+<!doctype html>
+<html>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+<body>
+    <canvas id="canvas" width="400" height="400" ></canvas>
+    <script src="utils.js"></script>
+    <script src="bola.js"></script>
+    <script>
+        window.onload = function () {
+            var canvas = document.getElementById('canvas'),
+                context = canvas.getContext('2d'),
+                ball = new Bola(20,0x2211ff),
+                ball2 = new Bola(20,0x2211ff),
+                vx = 0,
+                ax = 0;
+                vy = 0;
+                ay = 0;
+                ball2.color = "yellow";
+
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ball2.x = canvas.width / 2;
+            ball2.y = canvas.height / 2;
+            var ballSkillBack = 0
+            var deteksiArah = 0
+            var BallAtkBack = 0
+            window.addEventListener('keydown', function (event) {
+                if (event.keyCode === 65) { //left        
+                    deteksiArah = 1;
+                    ax = -0.01;
+                    // cekBatasFrame();
+                } else if (event.keyCode === 68) { //right 
+                    deteksiArah = 0;
+                    ax = 0.01;
+                    // cekBatasFrame();
+                // }else if (event.keyCode === 87) { //up 
+                //     ay = -0.01;
+                // }else if (event.keyCode === 83) { //bottom 
+                //     ay = 0.01;
+                //     console.log(ballSkillBack);          
+                }else if (event.keyCode === 69){ //E skill
+                    besar();                  
+                }else if (event.keyCode === 81){ //Q basic atk
+                    basikATKGo();
+                }
+            }, false);
+            window.addEventListener('keyup', function () {
+                ax = 0;
+                ay = 0;
+            }, false);
+            (function drawFrame() {
+                window.requestAnimationFrame(drawFrame, canvas);
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                vx += ax;
+                ball.x += vx;
+                vy += ay;
+                ball.y+=vy;
+                ball.draw(context);
+                ball2.draw(context);
+            }());
+
+
+
+            function besar() {
+                if (ballSkillBack === 0){
+                        for (let i = 10; i > 0; i--) {
+                        setTimeout(function() {
+                            ballSkillBack += 1;
+                            ball.radius += 5;
+                            if (deteksiArah === 0){
+                                ball.x += 5
+                                ball.y += -5
+                            }else if (deteksiArah === 1){
+                                ball.x += -5
+                                ball.y += -5
+                            }                       
+                            ball.draw(context)
+                            console.log(ballSkillBack);
+                            kecil()
+                        }, (10 - i) * 10);
+                        console.log(ballSkillBack);
+                        console.log("ball ax : "+ball.ax)
+                        }
+                    }
+                return 0
+            }
+            function kecil() {
+                if (ballSkillBack === 10){
+                        console.log(ballSkillBack);     
+                        for (let i = 10; i > 0; i--) {
+                        setTimeout(function() {
+                            ballSkillBack -= 1;
+                            ball.radius -= 5;
+                            if (deteksiArah === 0){
+                                ball.x += -5
+                                ball.y += 5
+                            }else if (deteksiArah === 1){
+                                ball.x += 5
+                                ball.y += 5
+                            } 
+                        }, (10 - i) * 10);
+                    }
+                    }
+                return 0    
+            }
+
+            function basikATKGo(){
+                if (BallAtkBack === 0){
+                        for (let i = 5; i > 0; i--) {
+                        setTimeout(function() {
+                            BallAtkBack += 1;
+                            if (deteksiArah === 0){
+                                ball.x += 5
+             
+                            }else if (deteksiArah === 1){
+                                ball.x += -5
+                  
+                            }                       
+                            ball.draw(context)
+                            console.log(BallAtkBack);
+                            basikATKBalik()
+                        }, (10 - i) * 10);
+                        console.log(BallAtkBack);
+                        console.log("ball ax : "+ball.ax)
+                        }
+                    }
+                return 0
+            }
+
+            function basikATKBalik(){
+                if (BallAtkBack === 5){
+                        for (let i = 5; i > 0; i--) {
+                        setTimeout(function() {
+                            BallAtkBack -= 1;
+                            if (deteksiArah === 0){
+                                ball.x += -5
+                     
+                            }else if (deteksiArah === 1){
+                                ball.x += 5
+                   
+                            }                       
+                            ball.draw(context)
+                            console.log(BallAtkBack);
+                        }, (10 - i) * 10);
+                        console.log(BallAtkBack);w
+                        console.log("ball ax : "+ball.ax)
+                        }
+                    }
+                return 0
+            }
+
+            // function cekBatasFrame(){
+            //     console.log(ball.x - ball.radius);
+            //     var kurang = ball.x - ball.radius;
+            //     var lebih = ball.x + ball.radius;
+            //     console.log(lebih);
+            //     if (ball.x - ball.radius < 0){
+            //         if (deteksiArah === 1 ){
+            //             ax = -0.05;
+            //         }else {
+            //             ax = 0.05;
+            //         }                    
+            //     }
+            //     else if (lebih > canvas.width){
+            //         if (deteksiArah === 1 ){
+            //             ax = -0.05;
+                   
+            //         }else {
+            //             ax = 0.05;
+            //         }  
+            //     }
+            //     else {
+            //         ax = 0;                 
+            //         ball.x = ball.x;
+            //     }
+            // }
+        }; 
+
+
+
+        
+    </script>
+</body>
+
+</html>

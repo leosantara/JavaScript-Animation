@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bab 3 - Grid</title>
+    <style>
+        canvas {
+            border: 1px solid black; /* Optional: Adds a border to the canvas */
+        }
+    </style>
+</head>
+<body>
+    <canvas id="myCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width  = window.innerWidth-40;
+        canvas.height = window.innerHeight-40;
+
+        function Titik(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        var grid = [];
+        baris = 10;
+        kolom = 10;
+        spacing = 60;
+
+        for(var y=0;y<baris;y++){
+            grid.push([]);
+        }
+
+        for(var y=0;y<baris;y++){
+            for(var x=grid[y].length;x<kolom;x++){
+                new_x = (0.5 + x) * spacing;
+                new_y = (0.5 + y) * spacing;
+                grid[y].push(new Titik(new_x,new_y));                
+            }
+        }
+
+        // Set circle properties
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = 20;
+
+        // Draw the circle
+        for(var y=0;y<baris;y++){
+            for(var x=0;x<kolom;x++){
+                ctx.beginPath();
+                ctx.arc(grid[x][y].x, grid[x][y].y, radius, 0, Math.PI * 2, false);
+                ctx.fillStyle = 'red';
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+        // Draw the grid
+        for(var y=0;y<baris;y++){
+            for(var x=0;x<kolom;x++){
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(grid[x][y].x-(0.5*spacing), grid[x][y].y-(0.5*spacing), spacing, spacing);
+                ctx.strokeStyle = 'blue';
+                ctx.stroke();
+                ctx.fillStyle = 'black';
+                ctx.font = "10px Arial";
+                ctx.fillText(grid[x][y].x + ", " + grid[x][y].y, grid[x][y].x, grid[x][y].y);
+                ctx.font = "12px Arial";
+                ctx.fillText(x + ", " + y, grid[x][y].x-(0.5*spacing), grid[x][y].y-(0.5*spacing)+10);
+                ctx.restore();
+            }
+        }
+
+    </script>
+</body>
+</html>

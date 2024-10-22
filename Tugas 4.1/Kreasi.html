@@ -1,0 +1,64 @@
+<canvas id="canvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+
+
+<script src="bola.js"></script>
+<script src="utils.js"></script>
+<script>
+    window.onload = function () {
+        var canvas = document.getElementById('canvas'),
+            context = canvas.getContext('2d'),
+            mouse = utils.captureMouse(canvas),
+            bolaR = new Bola(15, "FFFFF00"),
+            bolaG = new Bola(15, 0x00ff00),
+            bolaB = new Bola(15, 0x0000ff),
+            bolaY = new Bola(15, 0x0000ff),
+            spring = 0.05,
+            friksi = 0.9;
+        bolaR.color = "Red";
+        bolaG.color = "Green";
+        bolaB.color = "blue";
+        bolaY.color = "yellow";
+
+        gravitasi = 4;
+        bolaR.x = 0;
+        easing = 0.05;
+        bolaR.y = canvas.height / 2;
+        function rantai(bola, targetX, targetY) {
+            bola.ax = (targetX - bola.x) * spring;
+            bola.ay = (targetY - bola.y) * spring;
+            bola.vx += bola.ax;
+            bola.vy += bola.ay;
+            bola.vy += gravitasi;
+            bola.vx *= friksi;
+            bola.vy *= friksi;
+            bola.x += bola.vx;
+            bola.y += bola.vy;
+        }
+        (function drawFrame() {
+            window.requestAnimationFrame(drawFrame, canvas);
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            rantai(bolaR, mouse.x, mouse.y);
+            rantai(bolaB, bolaR.x, bolaR.y);
+            rantai(bolaG, bolaB.x, bolaB.y);
+            rantai(bolaY, bolaG.x, bolaG.y);
+            //draw rantai
+            context.beginPath();
+            context.moveTo(mouse.x, mouse.y);
+
+
+            context.stroke();
+            bolaR.draw(context);
+            bolaB.draw(context);
+            bolaG.draw(context);
+            bolaY.draw(context);
+            bolaG.vx = (bolaTarget.x - bolaG.x) * easing;
+            bolaG.vy = (bolaTarget.y - bolaG.y) * easing;
+            bolaG.x += bolaG.vx;
+            bolaG.y += bolaG.vy;
+            log.value = "bola.vx= " + bolaG.vx;
+            bolaG.draw(context);
+            bolaTarget.draw(context);
+        }());
+    };
+
+</script>

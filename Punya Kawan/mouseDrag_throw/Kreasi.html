@@ -1,0 +1,96 @@
+<canvas id="canvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+<textarea id="log"></textarea>
+
+<script src="bola.js"></script>
+<script src="utils.js"></script>
+<script>
+    window.onload = function () {
+        var canvas = document.getElementById('canvas'),
+            context = canvas.getContext('2d'),
+            log = document.getElementById('log'),
+            bolaG = new Bola(20, "#00ff00"),
+            mouse = utils.captureMouse(canvas),
+            jarak = 0,
+            deltaX = 0,
+            deltaY = 0,
+            mouseDitekan = false,
+            bounce = -0.8,
+            vx = 0,
+            vy = 0,
+            oldX, oldY;
+            sudut = 0;
+        bolaG.x = canvas.width / 2;
+        bolaG.y = canvas.height / 2;
+        bolaG.draw(context);
+        canvas.addEventListener('mousedown', function () {
+            jarak = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            if (jarak <= bolaG.radius) {
+                canvas.addEventListener('mouseup', fsMouseUp, false);
+                canvas.addEventListener('mousemove', fsMouseMove, false);
+                log.value = "kena";
+                oldX = bolaG.x;
+                oldY = bolaG.y;
+                mouseDitekan = true;
+            }
+        }, false);
+        function fsMouseUp() {
+            canvas.removeEventListener('mouseup', fsMouseUp, false);
+            canvas.removeEventListener('mousemove', fsMouseMove, false);
+            mouseDitekan = false;
+        };
+        function fsMouseMove(event) {
+            bolaG.x = mouse.x;
+            bolaG.y = mouse.y;
+            bolaG.draw(context);
+        };
+        (function drawFrame() {
+            window.requestAnimationFrame(drawFrame, canvas);
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            if (mouseDitekan) {
+                bolaG.vx = (bolaG.x - oldX);
+                bolaG.vy = (bolaG.y - oldY);
+                oldX = bolaG.x;
+                oldY = bolaG.y;
+                bolaG.radius +=0.2;
+                bolaG2 = new Bola(20, "#00ff00")
+                bolaG2.x = 200 + 225 * Math.sin(sudut);
+                bolaG2.y = canvas.width/2;
+                bolaG2.draw(context);
+            } else {
+                bolaG.x += bolaG.vx;
+                bolaG.y += bolaG.vy;
+                if (bolaG.x > canvas.width - bolaG.radius) {
+                    bolaG.x = canvas.width - bolaG.radius;
+                    bolaG.vx *= bounce;
+                    bolaG.radius +=1;
+                    sudut += 0.1;
+                    bolaG2.draw(context);
+                }
+                else if (bolaG.x < bolaG.radius) {
+                    bolaG.x = bolaG.radius;
+                    bolaG.vx *= bounce;
+                    bolaG.radius +=1;
+                    sudut += 0.1;
+                    bolaG2.draw(context);
+                }
+                if (bolaG.y > canvas.height - bolaG.radius) {
+                    bolaG.y = canvas.height - bolaG.radius;
+                    bolaG.vy *= bounce;
+                    bolaG.radius +=1;
+                    sudut += 0.1;
+                    bolaG2.draw(context);
+                }
+                else if (bolaG.y < bolaG.radius) {
+                    bolaG.y = bolaG.radius;
+                    bolaG.vy *= bounce;
+                    bolaG.radius +=1;
+                    sudut += 0.1;
+                    bolaG2.draw(context);
+                }
+            }
+            bolaG.draw(context);
+            log.value = String(bolaG.vx);
+        }())
+    };
+
+</script>

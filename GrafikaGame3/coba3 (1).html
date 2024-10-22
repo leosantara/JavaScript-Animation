@@ -1,0 +1,222 @@
+<html>
+<head>
+	<title>Bab 3 - Satu Objek</title>
+</head>
+<style>
+	#myCanvas{
+		border: 2px solid #000000;
+	}
+</style>
+<body>
+<canvas id="myCanvas"></canvas>
+<script>
+/* -- pemberian konteks ke kanvas -- */
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+canvas.width  = window.innerWidth-20;
+canvas.height = window.innerHeight-20;
+/* -- variabel-variabel awal -- */
+/* -- struktur data objek -- */
+var jarijaribola = 20;
+xawal = Math.floor(Math.random() * (800-(2*jarijaribola))) + jarijaribola;
+yawal = Math.floor(Math.random() * (600-(2*jarijaribola))) + jarijaribola;
+wawal = "#"+((1<<24)*Math.random()|0).toString(16);
+sawal = Math.random() * 2;
+var bola = {
+	x: xawal,
+	y: yawal,
+	warna: wawal,
+	sudut: 0,
+	offset: 0,
+	seek: false,
+x_tujuan: 0,
+y_tujuan: 0,
+seek: false,		//penggunaan 3 tipe data boolean
+		flee: false,		//memungkinkan kombinasi resultan gerak
+		wander: true	,	//dengan lebih dari satu behaviour
+		behaviour: 0,	//0: diam, 1: seek, 2: flee, dst.
+
+
+	jarijari: jarijaribola
+	
+};
+geseran = 0;
+msx = 0;
+msy = 0;
+
+/* -- deteksi keyboard -- */
+window.addEventListener("keydown", keyDn, true);
+window.addEventListener("keyup", keyUp, true);
+var yangDipencet = {};
+function keyDn(e){
+		yangDipencet[e.keyCode] = true;
+	    //panah kiri
+		if(yangDipencet[37]==true) { 
+			bola.sudut = bola.sudut - 0.03;
+		};
+		//panah kanan
+		if(yangDipencet[39]==true) { 
+			bola.sudut = bola.sudut + 0.03;
+		};
+	    //panah atas
+		if(yangDipencet[38]==true) {
+			bola.offset--;
+		};
+		//panah bawah
+		if(yangDipencet[40]==true) {
+			bola.offset++;
+		};
+	}
+function keyUp(e){
+		delete yangDipencet[e.keyCode];
+	}
+
+/* -- deteksi mouse -- */
+window.addEventListener("mousedown", mouseDn, true);
+window.addEventListener("mouseup", mouseUp, true);
+window.addEventListener("mousemove", mouseMv, true);
+var ditekan = false;
+function mouseDn(e){
+	msx = e.pageX-10;
+    msy = e.pageY-10;
+    //pindahkan koordinat objek mengikuti koordinat mouse
+    //bola.x = msx;
+    //bola.y = msy;
+    //jika butuh drag and drop, tambahkan baris di bawah ini
+    ditekan = true;
+
+	//simpan koordinat klik mouse sebagai tujuan bola
+	bola.x_tujuan = msx;
+		bola.y_tujuan = msy;
+		//beritahu kalau behaviour seek aktif
+		bola.seek = true;
+
+
+	//buat sebuah tipe data objek titik untuk menampung
+	clickPoint =	{
+		x: msx,
+		y: msy
+	}
+
+	const euDist = (x0, y0, x1, y1) => Math.hypot(x1 - x0, y1 - y0);
+	if(euDist(bola.x,bola.y,bola.x_tujuan,bola.y_tujuan)<=10){
+			bola.offset = 0;		//offset dinolkan
+			bola.seek = false;		//beritahu mode seek tidak aktif
+		}
+
+	if(bola.seek){
+		   if(euDist(bola.x,bola.y,bola.x_tujuan,bola.y_tujuan)<=10){
+			bola.offset = 0;		//offset dinolkan
+			bola.seek = false;		//beritahu mode seek tidak aktif
+		   }
+		}
+	//sudut diganti dengan mencari sudut arah tujuan objek
+	bola.sudut = sudutArahObjek(bola,clickPoint);	
+	//aktifkan offset = -1 supaya bergerakmaju
+	bola.offset = -1;
+	//sudut diganti dengan mencari sudut arah tujuan objek
+	bola.sudut = sudutArahObjek(bola,clickPoint);	
+	//aktifkan offset = -1 supaya bergerakmaju
+	bola.offset = -1;
+}
+//fungsi yang dilakukan saat mouse digerakkan
+function mouseMv(e){
+	//e adalah variabel penampung event
+	//koordinat mouse x ditampung pada e.pageX
+	//koordinat mouse y ditampung pada e.pageY
+	msx = e.pageX-10;
+    msy = e.pageY-10;
+    //contoh drag and drop:
+    //kerjakan sesuatu saat mouse digerakkan dan ditekan
+    if(ditekan){
+        //pindahkan koordinat objek mengikuti koordinat //mouse
+        bola.x = msx;
+        bola.y = msy;
+    }
+}
+//fungsi yang dilakukan saat tombol dilepas
+function mouseUp(e){
+	//set ditekan = false; atau
+	//kerjakan sesuatu saat tombol dilepas
+	ditekan = false;
+}
+
+//fungsi sudutArahObjek 
+function sudutArahObjek(objAsal, objTujuan){
+	//menghasilkan sudut dari normal (0 pi rad atau atas), dari posisi objek asal, menuju ke objek tujuan
+	//hitung jarak objek tujuan dari objek asal
+	jarakx = objTujuan.x - objAsal.x;
+	jaraky = objTujuan.y - objAsal.y;
+	//perkirakan kuadrannya
+	if(jarakx < 0){
+		sudut = 1.5 * Math.PI + Math.atan(jaraky/jarakx);
+	} else {
+		sudut = 0.5 * Math.PI + Math.atan(jaraky/jarakx);
+	}
+	//normalisasi sudut
+	//kembalikan ke nilai di luar PI
+	sudut = sudut / Math.PI
+	//kembalikan ke range 0-2 PI
+	if(sudut > 2){ sudut = sudut - 2; }
+	if(sudut < 0){ sudut = sudut + 2; }
+	return sudut;
+}
+
+/* -- penggambaran dinamis -- */
+function gambarkan(){
+	ctx.clearRect(0,0,canvas.width,canvas.height);
+	/* background dst masuk sini */
+
+	/* menggambar objek dinamisnya */
+	/* -- Menggambar Bola -- */
+	ctx.save();
+	//rekalkulasi koordinat
+	bola.x = bola.x + 0*Math.cos(bola.sudut * Math.PI)-bola.offset*Math.sin(bola.sudut * Math.PI);
+	bola.y = bola.y + 0*Math.sin(bola.sudut * Math.PI)+bola.offset*Math.cos(bola.sudut * Math.PI);
+	//translasikan koordinat objek
+	ctx.translate(bola.x, bola.y);
+	//rotasikan hadap objek	
+	ctx.rotate(bola.sudut * Math.PI);	
+	/* digambar bolanya */
+	ctx.beginPath();
+	ctx.arc(0,0,bola.jarijari,0,2*Math.PI, false);
+	ctx.closePath();
+	ctx.fillStyle = bola.warna;
+	ctx.fill();
+		//stopper bola panggil (klik datang)
+		if(bola.x==bola.x_tujuan&&bola.y==bola.y_tujuan){
+			bola.offset=0;
+		}
+	/* digambar cucuknya */
+	ctx.beginPath();
+	ctx.moveTo(0,-bola.jarijari);
+	ctx.lineTo(+10,-10);
+	ctx.lineTo(-10,-10);
+	ctx.closePath();
+	ctx.fillStyle = "#ffff00";
+	ctx.strokeStyle="#666666";
+	ctx.stroke();
+	ctx.fill();
+	//tampilkan kecepatan dan sudut
+	ctx.fillStyle = "#000000";
+	ctx.font = "14px Arial";
+	ctx.fillText("Offset: "+bola.offset,10,80);
+	ctx.fillText("Sudut: "+bola.sudut.toFixed(2),10,100);
+	
+	ctx.restore();
+	
+	//stopper (gaya gesek)
+	//bola.offset = bola.offset*0.97;
+	//if(Math.abs(bola.offset)<0.05){
+	//	bola.offset=0;
+	//}
+
+	//stopper bola panggil (klik datang)
+	if(bola.x==msx&&bola.y==msy){
+		bola.offset=0;
+	}
+}
+setInterval(gambarkan, 20);
+</script>
+</body>
+</html>

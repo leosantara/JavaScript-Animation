@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css"
+    href="tesCSS.css">
+</head>    
+<body>
+
+<canvas id="myCanvas" width="400" height="200" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML canvas tag.</canvas>
+
+<script>
+var c = document.getElementById("myCanvas");
+var ctx = c.getContext("2d");
+ctx.fillStyle="#34ebd5"
+// var mouse=utils.captureMouse(canvas),speed=2;
+x = c.height;
+y = c.height/2;
+var angle = 0;
+var radius = 10;
+
+
+function tes(x, y){
+    ctx.clearRect(0, 0, c.width, c.height); // Membersihkan canvas sebelum menggambar lingkaran baru
+    ctx.beginPath();
+    ctx.arc(x,y,radius,0,2*Math.PI);
+    // ctx.font="italic 30px serif"
+    ctx.fill();
+    ctx.stroke();
+
+}
+
+var x = 10;
+var y = 10;
+var mouseX = 0;
+var mouseY = 0;
+setInterval(myTimer, 10);
+
+function myTimer() {
+    tes(x, y);
+    
+    x = c.height/2 + radius * Math.cos(angle);
+    y = c.height/2 + radius * Math.sin(angle);
+    // x = c.height/1 + radius * Math.sin(angle);
+    // y = c.height/2 + radius * Math.cos(angle);
+    
+    angle += 0.1;
+
+    // radius = 20*(1+Math.sin(angle))
+
+
+}
+
+function MouseGerak(apa){
+    mouseX = apa.clientX
+    mouseY = apa.clientY
+}
+
+
+</script>
+
+</body>
+</html>

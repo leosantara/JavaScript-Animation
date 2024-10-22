@@ -1,0 +1,175 @@
+<html>
+<head>
+	<title>Bab 3 - Satu Objek</title>
+</head>
+<style>
+	#myCanvas{
+		border: 2px solid #000000;
+	}
+</style>
+<body>
+<canvas id="myCanvas" width="800" height="600"></canvas>
+<div id="aha">aha</div>
+<script>
+
+var ahaa= document.getElementById("aha").Text = 1;
+/* -- pemberian konteks ke kanvas -- */
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+/* -- variabel-variabel awal -- */
+/* -- struktur data objek -- */
+var jarijaribola = 20;
+xawal = Math.floor(Math.random() * (800-(2*jarijaribola))) + jarijaribola;
+yawal = Math.floor(Math.random() * (600-(2*jarijaribola))) + jarijaribola;
+wawal = "#"+((1<<24)*Math.random()|0).toString(16);
+sawal = Math.random() * 2;
+var bola = {
+	x: xawal,
+	y: yawal,
+	warna: wawal,
+	sudut: sawal,
+	offset: 10,
+	jarijari: jarijaribola,
+	percepatan: 2,
+	vx: 0, // Kecepatan horizontal
+	vy: 0  // Kecepatan vertikal
+};
+const tombolterakhir = [];
+
+var msx;
+var msy;
+/* -- deteksi keyboard -- */
+window.addEventListener("keydown", keyDn, true);
+window.addEventListener("keyup", keyUp, true);
+var yangDipencet = {};
+function keyDn(e){
+		yangDipencet[e.keyCode] = true;
+		if(yangDipencet[38] == true) {  // Panah atas
+			bola.vy = -bola.percepatan; // Gerak ke atas
+			bola.sudut = 0;
+		};
+		if(yangDipencet[40] == true) {  // Panah bawah
+			bola.vy = bola.percepatan;  // Gerak ke bawah
+			bola.sudut = Math.PI;
+		};
+		if(yangDipencet[37] == true) {  // Panah kiri
+			bola.vx = -bola.percepatan;  // Gerak ke kiri
+			bola.sudut = -Math.PI / 2;
+		};
+		if(yangDipencet[39] == true) {  // Panah kanan
+			bola.vx = bola.percepatan;   // Gerak ke kanan
+			bola.sudut = Math.PI / 2;
+		};
+}
+
+function keyUp(e){
+		delete yangDipencet[e.keyCode];
+}
+
+/* -- deteksi mouse -- */
+window.addEventListener("mousedown", mouseDn, true);
+window.addEventListener("mouseup", mouseUp, true);
+window.addEventListener("mousemove", mouseMv, true);
+var ditekan = false;
+function mouseDn(e){
+	msx = e.pageX-10;
+    msy = e.pageY-10;
+    ditekan = true;
+}
+function mouseMv(e){
+	msx = e.pageX-10;
+    msy = e.pageY-10;
+    if(ditekan){
+        bola.x = msx;
+        bola.y = msy;
+    }
+}
+function mouseUp(e){
+	ditekan = false;
+}
+
+/* -- deteksi mouse -- */
+window.addEventListener("mousedown", mouseDn, true);
+window.addEventListener("mouseup", mouseUp, true);
+window.addEventListener("mousemove", mouseMv, true);
+var ditekan = false;
+function mouseDn(e){
+	msx = e.pageX-10;
+    msy = e.pageY-10;
+    //pindahkan koordinat objek mengikuti koordinat mouse
+    //bola.x = msx;
+    //bola.y = msy;
+    //jika butuh drag and drop, tambahkan baris di bawah ini
+    ditekan = true;
+}
+//fungsi yang dilakukan saat mouse digerakkan
+function mouseMv(e){
+	//e adalah variabel penampung event
+	//koordinat mouse x ditampung pada e.pageX
+	//koordinat mouse y ditampung pada e.pageY
+	msx = e.pageX-10;
+    msy = e.pageY-10;
+    //contoh drag and drop:
+    //kerjakan sesuatu saat mouse digerakkan dan ditekan
+    if(ditekan){
+        //pindahkan koordinat objek mengikuti koordinat //mouse
+        bola.x = msx;
+        bola.y = msy;
+    }
+}
+//fungsi yang dilakukan saat tombol dilepas
+function mouseUp(e){
+	//set ditekan = false; atau
+	//kerjakan sesuatu saat tombol dilepas
+	ditekan = false;
+}
+
+/* -- penggambaran dinamis -- */
+function gambarkan(){
+	ctx.clearRect(0,0,800,600);
+	
+	// Update posisi bola berdasarkan kecepatan
+	bola.x += bola.vx;
+	bola.y += bola.vy;
+	
+	// Perlambatan (friction) untuk menghentikan momentum secara perlahan
+	bola.vx *= 0.99;  // Mengurangi kecepatan horizontal
+	bola.vy *= 0.99;  // Mengurangi kecepatan vertikal
+	
+	// Menggambar objek dinamis
+	ctx.save();
+	ctx.translate(bola.x, bola.y);
+    
+    // Lakukan rotasi berdasarkan sudut bola
+    ctx.rotate(bola.sudut);
+	console.log("msx : "+msx);
+	console.log("bolax : " +bola.x);
+	console.log("vyxy : "+ bola.vy + " dan "+ bola.vx);
+    if (bola.x > msx + 1 || bola.x < msx + 1 || bola.x > msx - 1 || bola.x < msx - 1 && bola.y > msy + 1 || bola.y < msy + 1 || bola.y > msy - 1 || bola.y < msy - 1){
+	
+	}
+    // Menggambar bola
+    ctx.beginPath();
+    ctx.arc(0, 0, bola.jarijari, 0, 2 * Math.PI, false);
+    ctx.closePath();
+    ctx.fillStyle = bola.warna;
+    ctx.fill();
+
+
+    // Menggambar cucuk di atas bola (sebagai indikator arah)
+    ctx.beginPath();
+    ctx.moveTo(0, -bola.jarijari);  // Pindahkan ke atas bola
+    ctx.lineTo(10, -10);  // Gambar cucuk ke kanan bawah
+    ctx.lineTo(-10, -10);  // Gambar cucuk ke kiri bawah
+    ctx.closePath();
+    ctx.fillStyle = "#ffff00";
+    ctx.strokeStyle = "#666666";
+    ctx.stroke();
+    ctx.fill();
+    
+    ctx.restore();
+}
+setInterval(gambarkan, 20);
+</script>
+</body>
+</html>

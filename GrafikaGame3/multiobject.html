@@ -1,0 +1,69 @@
+<html>
+<head>
+	<title>Bab 3 - Multi Objek</title>
+</head>
+<style>
+	#myCanvas{
+		border: 2px solid #000000;
+	}
+</style>
+<body>
+<canvas id="myCanvas" width="800" height="600"></canvas>
+<script>
+/* -- pemberian konteks ke kanvas -- */
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+/* -- variabel-variabel awal -- */
+/* -- struktur data objek -- */
+var jmlbola = 2;
+var jarijaribola = 20;
+var bola = new Array;
+for(var i=0; i<jmlbola; i++){
+	xawal = Math.floor(Math.random() * (800-(2*jarijaribola))) + jarijaribola;
+	yawal = Math.floor(Math.random() * (600-(2*jarijaribola))) + jarijaribola;
+	wawal = "#"+((1<<24)*Math.random()|0).toString(16);
+	sawal = Math.random() * 2;
+	bola[i] = {
+		x: xawal,
+		y: yawal,
+		warna: wawal,
+		sudut: sawal,
+		offset: 0,
+		jarijari: jarijaribola
+	};
+}
+/* -- penggambaran dinamis -- */
+function gambarkan(){
+	ctx.clearRect(0,0,800,600);
+	/* background dst masuk sini */
+
+	/* menggambar objek dinamisnya */
+	/* -- Menggambar Bola -- */
+	for(i=0;i<jmlbola;i++){
+		ctx.save();
+		/* digambar bolanya */
+		ctx.beginPath();
+		ctx.arc(bola[i].x,bola[i].y,bola[i].jarijari,0,2*Math.PI, false);		
+		ctx.closePath();
+		ctx.fillStyle = bola[i].warna;
+		ctx.fill();
+		/* digambar cucuknya */
+		ctx.beginPath();
+		ctx.moveTo(bola[i].x,bola[i].y-bola[i].jarijari);
+		ctx.lineTo(bola[i].x+10,bola[i].y-10);
+		ctx.lineTo(bola[i].x-10,bola[i].y-10);
+		ctx.closePath();
+		ctx.fillStyle = "#ffff00";
+		ctx.strokeStyle="#666666";
+		ctx.stroke();
+		ctx.fill();
+		ctx.restore();
+	}
+}
+
+setInterval(gambarkan, 20);
+
+
+</script>
+</body>
+</html>

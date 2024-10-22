@@ -1,0 +1,317 @@
+<html>
+<head>
+	<title>Bab 3 - Satu Objek</title>
+</head>
+<style>
+	#myCanvas{
+		border: 2px solid #000000;
+	}
+</style>
+<body>
+<canvas id="myCanvas"></canvas>
+<script>
+	/* -- pemberian konteks ke kanvas -- */
+	var canvas = document.getElementById("myCanvas");
+	var ctx = canvas.getContext("2d");
+	canvas.width  = window.innerWidth-20;
+	canvas.height = window.innerHeight-20;
+	
+	/* -- variabel-variabel awal -- */
+	radius_reg = 5					//jarak minimum registrasi adalah 5 piksel dari titik acuan)
+
+	/* -- struktur data Bola -- */
+	var jarijaribola = 20;
+	xawal = Math.floor(Math.random() * (800-(2*jarijaribola))) + jarijaribola;
+	yawal = Math.floor(Math.random() * (600-(2*jarijaribola))) + jarijaribola;
+	wawal = "#"+((1<<24)*Math.random()|0).toString(16);
+	sawal = Math.random() * 2;
+	var bola = {
+		x: xawal,
+		y: yawal,
+		warna: wawal,
+		sudut: 0,
+		offset: 0,
+		jarijari: jarijaribola,
+		seek: false,
+		x_tujuan: 0,
+		y_tujuan: 0
+	};
+	msx = 0;
+	msy = 0;
+	
+	//Struktur data Target
+	let jjT = 15;					//jari-jari objek Target
+	let jmlTarget = 50;				//jumlah Target
+	let target = [];				//deklarasi array Target
+	for(i=0;i<jmlTarget;i++){			//05d di-loop
+		xTawal = Math.floor(Math.random() * (canvas.width-(2*jjT))) + jjT;
+		yTawal = Math.floor(Math.random() * (canvas.height-(2*jjT))) + jjT;
+		wTawal = "#"+((1<<24)*Math.random()|0).toString(16);		//random warna;
+		target[i] = {
+			x: xTawal,
+			y: yTawal,
+			jarijari: jjT,
+			warna: wTawal
+		};
+	}
+	
+
+	/*--- fungsi collision detection dua objek lingkaran ---*/
+	function cekTumbukanLingkaran(objek1, objek2){
+		var x1 = objek1.x;
+		var x2 = objek2.x;
+		var y1 = objek1.y;
+		var y2 = objek2.y;
+		var jarakEuclidean = Math.sqrt( Math.pow((x1-x2), 2) + Math.pow((y1-y2), 2) );
+
+		if(jarakEuclidean <= (objek1.jarijari + objek2.jarijari)){
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+
+	// Fungsi untuk memastikan objek tidak saling tumpang tindih
+	function tidakTumpangTindih(objek, semuaObjek) {
+		for (let i = 0; i < semuaObjek.length; i++) {
+			if (cekTumbukanLingkaran(objek, semuaObjek[i])) {
+				relokasiObjek(targets[i]);
+				return false; // Terdapat tumpang tindih
+			}
+		}
+		return true; // Tidak ada tumpang tindih
+	}
+
+		// Fungsi untuk merelokasi objek yang bertabrakan
+		function relokasiObjek(bola) {
+		let lokasiAman = false;
+		while (!lokasiAman) {
+			// Tentukan lokasi baru secara acak
+			bola.x = Math.floor(Math.random() * (canvas.width - 2 * jarijaribola)) + jarijaribola;
+			bola.y = Math.floor(Math.random() * (canvas.height - 2 * jarijaribola)) + jarijaribola;
+
+			// Cek apakah lokasi baru aman (tidak tumpang tindih dengan bola lain)
+			if (tidakTumpangTindih(bola, targets)) {
+				lokasiAman = true;
+			}
+		}
+	}
+
+	function wander() {
+		var perubahanSudut = (Math.random() - 0.5) * 0.2; // Perubahan kecil di sudut
+		bola.sudut += perubahanSudut;
+	}
+
+	function checkEdges() {
+		// Jika bola keluar dari kanan, pindah ke kiri
+		if (bola.x - bola.jarijari > canvas.width) {
+			bola.x = -bola.jarijari;
+		}
+		// Jika bola keluar dari kiri, pindah ke kanan
+		if (bola.x + bola.jarijari < 0) {
+			bola.x = canvas.width + bola.jarijari;
+		}
+		// Jika bola keluar dari bawah, pindah ke atas
+		if (bola.y - bola.jarijari > canvas.height) {
+			bola.y = -bola.jarijari;
+		}
+		// Jika bola keluar dari atas, pindah ke bawah
+		if (bola.y + bola.jarijari < 0) {
+			bola.y = canvas.height + bola.jarijari;
+		}
+	}
+
+	/*-- fungsi hitung Euclidean distance --*/
+	const euDist = (x0, y0, x1, y1) => Math.hypot(x1 - x0, y1 - y0);
+
+	/* -- deteksi keyboard -- */
+	window.addEventListener("keydown", keyDn, true);
+	window.addEventListener("keyup", keyUp, true);
+	var yangDipencet = {};
+	function keyDn(e){
+		yangDipencet[e.keyCode] = true;
+		//panah kiri
+		if(yangDipencet[37]==true) { 
+			bola.sudut = bola.sudut - 0.03;
+		};
+		//panah kanan
+		if(yangDipencet[39]==true) { 
+			bola.sudut = bola.sudut + 0.03;
+		};
+		//panah atas
+		if(yangDipencet[38]==true) {
+			bola.offset--;
+		};
+		//panah bawah
+		if(yangDipencet[40]==true) {
+			bola.offset++;
+		};
+		}
+	function keyUp(e){
+		delete yangDipencet[e.keyCode];
+	}
+
+	/* -- deteksi mouse -- */
+	window.addEventListener("mousedown", mouseDn, true);
+	window.addEventListener("mouseup", mouseUp, true);
+	window.addEventListener("mousemove", mouseMv, true);
+	var ditekan = false;
+	function mouseDn(e){
+		msx = e.pageX-10;
+		msy = e.pageY-10;
+		//jika butuh drag and drop, tambahkan baris di bawah ini
+		ditekan = true;
+		//simpan koordinat klik mouse sebagai tujuan bola
+		bola.x_tujuan = msx;
+		bola.y_tujuan = msy;
+		//beritahu kalau behaviour seek bolanya aktif
+		bola.seek = true;
+
+		//buat sebuah tipe data objek titik untuk menampung
+		clickPoint =	{
+			x: msx,
+			y: msy
+		}
+		//sudut diganti dengan mencari sudut arah tujuan objek
+		bola.sudut = sudutArahObjek(bola,clickPoint);	
+		//aktifkan offset = -1 supaya bergerakmaju
+		bola.offset = -1;
+	}
+	//fungsi yang dilakukan saat mouse digerakkan
+	function mouseMv(e){
+		//e adalah variabel penampung event
+		//koordinat mouse x ditampung pada e.pageX
+		//koordinat mouse y ditampung pada e.pageY
+		msx = e.pageX-10;
+		msy = e.pageY-10;
+		//contoh drag and drop:
+		//kerjakan sesuatu saat mouse digerakkan dan ditekan
+		if(ditekan){
+			//pindahkan koordinat objek mengikuti koordinat //mouse
+			//bola.x = msx;
+			//bola.y = msy;
+		}
+	}
+	//fungsi yang dilakukan saat tombol dilepas
+	function mouseUp(e){
+		//set ditekan = false; atau
+		//kerjakan sesuatu saat tombol dilepas
+		ditekan = false;
+	}
+
+	//fungsi sudutArahObjek 
+	function sudutArahObjek(objAsal, objTujuan){
+		//menghasilkan sudut dari normal (0 pi rad atau atas), dari posisi objek asal, menuju ke objek tujuan
+		//hitung jarak objek tujuan dari objek asal
+		jarakx = objTujuan.x - objAsal.x;
+		jaraky = objTujuan.y - objAsal.y;
+		//perkirakan kuadrannya
+		if(jarakx < 0){
+			sudut = 1.5 * Math.PI + Math.atan(jaraky/jarakx);
+		} else {
+			sudut = 0.5 * Math.PI + Math.atan(jaraky/jarakx);
+		}
+		//normalisasi sudut
+		//kembalikan ke nilai di luar PI
+		sudut = sudut / Math.PI
+		//kembalikan ke range 0-2 PI
+		if(sudut > 2){ sudut = sudut - 2; }
+		if(sudut < 0){ sudut = sudut + 2; }
+		return sudut;
+	}
+
+	/* -- penggambaran dinamis -- */
+	function gambarkan(){
+		ctx.clearRect(0,0,canvas.width,canvas.height);
+		/* background dst masuk sini */
+
+		/* menggambar objek dinamisnya */
+		wander();
+		//menggambar Target
+		for(i=0;i<jmlTarget;i++){		//05d diberi looping
+			//05c cek tumbukan bola dengan target
+			if(cekTumbukanLingkaran(bola,target[i])){
+			//kalau kena lalu target diapakan, atau bolanya kenapa, tulis di sini
+				//contoh: random posisi bola kembali dan random warnanya
+				newx = Math.floor(Math.random() * (canvas.width-(2*jjT))) + jjT;
+				newy = Math.floor(Math.random() * (canvas.height-(2*jjT))) + jjT;
+				target[i].warna = "#"+((1<<24)*Math.random()|0).toString(16);		//random warna;
+				target[i].jarijari=5;
+				target[i].x = newx;
+				target[i].y = newy;
+			}
+			//05c2 animasikan pertumbuhan target jika terkecilkan
+			if(target[i].jarijari<jjT){
+				target[i].jarijari=target[i].jarijari+0.5;
+			}
+
+			checkEdges();
+			//05c gambarkan target
+			ctx.save();
+				ctx.beginPath();
+				ctx.arc(target[i].x,target[i].y,target[i].jarijari,0,2*Math.PI,false);
+				ctx.closePath();
+				ctx.fillStyle=target[i].warna;
+				ctx.fill();
+			ctx.restore();
+		}
+
+		/* -- Menggambar Bola -- */
+		ctx.save();
+		//rekalkulasi koordinat
+		bola.x = bola.x + 0*Math.cos(bola.sudut * Math.PI)-bola.offset*Math.sin(bola.sudut * Math.PI);
+		bola.y = bola.y + 0*Math.sin(bola.sudut * Math.PI)+bola.offset*Math.cos(bola.sudut * Math.PI);
+		//translasikan koordinat objek
+		ctx.translate(bola.x, bola.y);
+		//rotasikan hadap objek	
+		ctx.rotate(bola.sudut * Math.PI);	
+		//digambar bolanya
+		ctx.beginPath();
+		ctx.arc(0,0,bola.jarijari,0,2*Math.PI, false);
+		ctx.closePath();
+		ctx.fillStyle = bola.warna;
+		ctx.fill();
+		//digambar cucuknya
+		ctx.beginPath();
+		ctx.moveTo(0,-bola.jarijari);
+		ctx.lineTo(+10,-10);
+		ctx.lineTo(-10,-10);
+		ctx.closePath();
+		ctx.fillStyle = "#ffff00";
+		ctx.strokeStyle="#666666";
+		ctx.stroke();
+		ctx.fill();
+		ctx.restore();
+
+		//tampilkan kecepatan dan sudut
+		ctx.fillStyle = "#000000";
+		ctx.font = "14px Arial";
+		ctx.fillText("Offset: "+bola.offset,bola.x - bola.jarijari, bola.y + bola.jarijari + 20);
+		ctx.fillText("Sudut: "+bola.sudut.toFixed(2),bola.x - bola.jarijari, bola.y + bola.jarijari + 40);
+		ctx.fillText("Koord: "+bola.x.toFixed(2)+", "+bola.y.toFixed(2),bola.x - bola.jarijari, bola.y + bola.jarijari + 60);
+		ctx.fillText("Jarak: "+euDist(bola.x,bola.y,bola.x_tujuan,bola.y_tujuan).toFixed(2),bola.x - bola.jarijari, bola.y + bola.jarijari + 80);
+				
+		//stopper (gaya gesek)
+		//bola.offset = bola.offset*0.97;
+		//if(Math.abs(bola.offset)<0.05){
+		//	bola.offset=0;
+		//}
+
+		//update kecepatan bola - haste arrive
+		if(bola.seek==true){
+			var speed = Math.round(euDist(bola.x,bola.y,bola.x_tujuan,bola.y_tujuan)/20);
+			bola.offset = -speed;
+		}
+		
+		//stopper bola panggil (klik datang)
+		if(euDist(bola.x,bola.y,bola.x_tujuan,bola.y_tujuan)<=radius_reg){
+			bola.offset = 0;		//offset dinolkan
+			bola.seek = false;		//beritahu mode seek tidak aktif
+		}
+	
+	}
+	setInterval(gambarkan, 20);
+</script>
+</body>
+</html>

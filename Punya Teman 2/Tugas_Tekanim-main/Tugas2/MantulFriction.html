@@ -1,0 +1,42 @@
+<canvas id="canvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+<textarea id="log"></textarea>
+<textarea id="log2"></textarea>
+<script src="utils.js"></script>
+<script src="bola.js"></script>
+<script>
+    window.onload = function () {
+        var canvas = document.getElementById('canvas'),
+            context = canvas.getContext('2d'),
+            // mouse = utils.captureMouse(canvas),
+            gravitasi = 0.08,
+            friksi = -0.9,
+            log = document.getElementById('log'),
+            log2 = document.getElementById('log2'),
+            bolaR = new Bola(10, 0xff0000);
+            bolaR.x = canvas.width / 2;
+            bolaR.y = 0;
+            bolaR.vx = Math.random() * 2;
+            bolaR.vy = Math.random() * 2;
+            bolaR.draw(context);
+        (function drawFrame() {
+            window.requestAnimationFrame(drawFrame, canvas);
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            bolaR.vy += gravitasi;
+            bolaR.x += bolaR.vx;
+            bolaR.y += bolaR.vy;
+            log.value = "bola.vy = " + bolaR.vy;
+            log2.value = "bola.vx = " + bolaR.vx;
+            if (bolaR.y > canvas.height - bolaR.radius) {
+                bolaR.vy *= friksi;
+            }
+            if (bolaR.x > canvas.width - bolaR.radius || bolaR.x < 0 + bolaR.radius) {
+                bolaR.vx *= friksi;
+            }
+            if (bolaR.x== canvas.width){
+                bolaR.y = bolaR.y -bolaR.radius;
+            }
+            bolaR.draw(context);
+        }());
+    };
+
+</script>

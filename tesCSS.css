@@ -1,0 +1,14 @@
+
+
+header, nava, footer, article {display:block;}
+
+
+canvas {
+    background-color : #bbbbbb;
+    margin:10px;
+    padding:10px;
+    border-radius: 100px;
+    border:double #0000ff;
+    
+}
+

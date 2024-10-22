@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bola Bergerak dengan Tombol dan Keyboard</title>
+    <style>
+        canvas {
+            border: 1px solid #d3d3d3;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="myCanvas" width="800" height="400"></canvas>
+
+<script>
+    var canvas = document.getElementById("myCanvas");
+    var ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#00ff00";
+
+    var ball = {
+        x: 100, // posisi awal x
+        y: canvas.height / 2, // posisi awal y
+        radius: 10, // radius bola
+        draw: function(ctx) {
+            ctx.beginPath();
+            ctx.arc(100, 100, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    };
+
+    var speed = 2; // kecepatan awal
+
+    // Fungsi untuk menggambar bola
+    function drawBall() {
+      
+        ball.draw(ctx);
+    }
+
+    // Fungsi untuk menggerakkan bola berdasarkan arah yang ditentukan
+    function moveBall(direction) {
+        if (direction === "left") {
+            ball.x -= speed;
+        } else if (direction === "right") {
+            ball.x += speed;
+        } else if (direction === "up") {
+            ball.y -= speed;
+        } else if (direction === "down") {
+            ball.y += speed;
+        }
+    }
+
+    // Event listener untuk tombol keyboard ditekan
+    document.addEventListener("keydown", function(event) {
+        var key = event.keyCode;
+        if (key === 37) {
+            moveBall("left");
+        } else if (key === 39) {
+            moveBall("right");
+        } else if (key === 38) {
+            moveBall("up");
+        } else if (key === 40) {
+            moveBall("down");
+        }
+    });
+
+    // Fungsi untuk menggambar ulang bola dengan interval
+    setInterval(function() {
+        drawBall();
+    }, 10); // Refresh setiap 10 milidetik
+</script>
+
+</body>
+</html>

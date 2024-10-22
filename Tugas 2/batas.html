@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Removal</title>
+<link rel="stylesheet" type="text/css" href="pendukung/style.css">
+</head>
+<body>
+
+<canvas id="canvas" width="400" height="400"></canvas>
+<textarea id="log"></textarea>
+<script src="utils.js"></script>
+<script src="bola.js"></script>
+<script>
+window.onload=function(){
+var canvas=document.getElementById('canvas'),
+context=canvas.getContext('2d'),
+mouse=utils.captureMouse(canvas),
+btsKanan=canvas.width
+btsBawah=canvas.height,
+gravitasi=0.02,
+arrayBola=[],
+jumBola=15,
+log = document.getElementById('log');
+for(var bolaR,i=0;i<jumBola;i++){
+bolaR=new Ball(10,0xff0000);
+bolaR.x = canvas.width/2;
+bolaR.y = canvas.height/2;
+bolaR.vx = 1 - Math.random() * 2;
+bolaR.vy = 1-Math.random()*2;
+bolaR.id = "bola ke-" + i;
+arrayBola.push(bolaR);
+}
+function draw(bolaR,pos){
+//bolaR.vy +=gravitasi;
+bolaR.x += bolaR.vx;
+
+bolaR.y += bolaR.vy;
+bolaR.x += bolaR.vx;
+bolaR.y += bolaR.vy;
+if (bolaR.x - bolaR.radius > btsKanan ||
+ bolaR.x + bolaR.radius < 0 ||
+ bolaR.y - bolaR.radius > btsBawah ||
+ bolaR.y + bolaR.radius < 0) {
+ arrayBola.splice(pos, 1); //remove ball from array
+ if (arrayBola.length > 0) {
+ log.value = "bola ke-" + bolaR.id+" menghilang";
+ } else {
+ log.value = "Habis sudah!";
+ }
+}
+bolaR.draw(context);
+}
+(function drawFrame(){
+window.requestAnimationFrame(drawFrame,canvas);
+context.clearRect(0,0,btsKanan,btsBawah);
+var i=arrayBola.length;
+while(i--){
+draw(arrayBola[i],i)
+}
+}());
+};
+</script>
+</body>
+</html>

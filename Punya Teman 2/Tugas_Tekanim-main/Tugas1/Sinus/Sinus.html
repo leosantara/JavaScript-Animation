@@ -1,0 +1,20 @@
+<canvas id="canvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+
+<script src="utils.js"></script>
+<script src="bola.js"></script>
+<script>
+    window.onload = function () {
+        var canvas = document.getElementById("canvas"),
+            ctx = canvas.getContext("2d"),
+            ball = new Bola(10, "red"),
+            sudut = 0;
+        setInterval(gambarFrame, 17);
+        function gambarFrame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ball.x = 200 + 100 * Math.sin(sudut);
+            ball.y = 200 + 100 * Math.sin(sudut);
+            ball.draw(ctx);
+            sudut += 0.1;
+        }
+    }
+</script>

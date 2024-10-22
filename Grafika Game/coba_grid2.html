@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bab 3 - Grid</title>
+    <style>
+        canvas {
+            border: 1px solid black; /* Optional: Adds a border to the canvas */
+        }
+    </style>
+</head>
+<body>
+    <canvas id="myCanvas"></canvas>
+    <script>
+        //pemberian konteks ke kanvas
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width  = window.innerWidth-40;
+        canvas.height = window.innerHeight-40;
+
+        //deklasrasi tipe data titik
+        function Titik(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        //deklarasi euclidean distance
+        const euDist = (x0, y0, x1, y1) => Math.hypot(x1 - x0, y1 - y0);
+
+        //deklarasi grid
+        var grid = [];
+        baris = 7;          //jumlah baris
+        kolom = 7;          //jumlah kolom
+        spacing = 80;      //ukuran grid
+
+        //penciptaan grid
+        for(var x=0;x<baris;x++){
+            grid.push([]);
+        }
+
+        for(var x=0;x<baris;x++){
+            for(var y=grid[x].length;y<kolom;y++){
+                new_x = (0.5 + x) * spacing;
+                new_y = (0.5 + y) * spacing;
+                grid[x].push(new Titik(new_x,new_y));                
+            }
+        }
+        //sampai sini
+
+        //set nilai awal lingkaran
+        const radius = 20;
+        radius_reg = 1; //jarak minimum registrasi adalah 10 piksel dari titik acuan)
+
+        //buat objek bola
+        var jarijaribola = 20;
+        xGridAwal = 0;
+        yGridAwal = 0;
+        xawal = grid[xGridAwal][yGridAwal].x;
+        yawal = grid[xGridAwal][yGridAwal].y;
+        wawal = "#"+((1<<24)*Math.random()|0).toString(16);
+        sawal = Math.random() * 2;
+        var bola = {
+            x: xawal,                   //x dan y tetap dipakai, untuk keperluan visualisasi
+            y: yawal,
+            x_grid: xGridAwal,          //kalkulasi menggunakan koordinat gridnya, bukan x dan y langsung
+            y_grid: yGridAwal,
+            warna: wawal,
+            sudut: 0,
+            offset: 0,
+            jarijari: jarijaribola,
+            seek: false,
+            //x_tujuan: 0,
+            //y_tujuan: 0
+            x_grid_tujuan: 0,           //tujuan juga sama
+            y_grid_tujuan: 0,
+        };
+
+        //deteksi keyboard
+        window.addEventListener("keydown", keyDn, true);
+        window.addEventListener("keyup", keyUp, true);
+        var yangDipencet = {};
+        function keyDn(e){
+            yangDipencet[e.keyCode] = true;
+            
+            //deteksi
+            //if(bola.seek==false){        //pacman-like response
+                //panah kiri
+                if(yangDipencet[37]==true) { 
+                    if(bola.x_grid > 0){
+                        bola.x_grid_tujuan = bola.x_grid - 1; //pacman-like behaviour untuk per sumbu
+                    }
+                };
+                //panah kanan
+                if(yangDipencet[39]==true) { 
+                    if(bola.x_grid < (kolom-1)){
+                        bola.x_grid_tujuan = bola.x_grid + 1;
+                    }
+                };
+                //panah atas
+                if(yangDipencet[38]==true) {
+                    if(bola.y_grid > 0){
+                        bola.y_grid_tujuan = bola.y_grid - 1;
+                    }
+                };
+                //panah bawah
+                if(yangDipencet[40]==true) {
+                    if(bola.y_grid < (baris-1)){
+                        bola.y_grid_tujuan = bola.y_grid + 1;
+                    }
+                };
+            //}
+
+            //tindak lanjut
+            if((bola.x_grid==bola.x_grid_tujuan)&&(bola.y_grid==bola.y_grid_tujuan)){
+                //jika hasil akhir grid tujuan sama dengan grid awal, tidak lakukan apa-apa
+            } else {
+                //jika beda, maka
+                //beritahu kalau behaviour seek bolanya aktif
+                bola.seek = true;
+                //buat sebuah tipe data objek titik untuk menampung
+                gridTujuanPoint =	{
+                    x: grid[bola.x_grid_tujuan][bola.y_grid_tujuan].x,
+                    y: grid[bola.x_grid_tujuan][bola.y_grid_tujuan].y
+                }
+                //sudut diganti dengan mencari sudut arah tujuan objek
+                bola.sudut = sudutArahObjek(bola,gridTujuanPoint);	
+                //aktifkan offset = -1 supaya bergerak maju
+                bola.offset = -1;
+            }
+        }
+        function keyUp(e){
+            delete yangDipencet[e.keyCode];
+        }
+
+        //fungsi sudutArahObjek 
+        function sudutArahObjek(objAsal, objTujuan){
+            //menghasilkan sudut dari normal (0 pi rad atau atas), dari posisi objek asal, menuju ke objek tujuan
+            //hitung jarak objek tujuan dari objek asal
+            jarakx = objTujuan.x - objAsal.x;
+            jaraky = objTujuan.y - objAsal.y;
+            //perkirakan kuadrannya
+            if(jarakx < 0){
+                sudut = 1.5 * Math.PI + Math.atan(jaraky/jarakx);
+            } else {
+                sudut = 0.5 * Math.PI + Math.atan(jaraky/jarakx);
+            }
+            //normalisasi sudut
+            //kembalikan ke nilai di luar PI
+            sudut = sudut / Math.PI
+            //kembalikan ke range 0-2 PI
+            if(sudut > 2){ sudut = sudut - 2; }
+            if(sudut < 0){ sudut = sudut + 2; }
+            return sudut;
+        }
+
+        //koordinat tampilan teks statistik bola
+        textX = (kolom+0.5) * spacing;
+        textY = kolom+0.5 * spacing;
+
+        /* -- penggambaran dinamis -- */
+        function gambarkan(){
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            /* background dst masuk sini */
+            //menggambar lingkaran
+            for(var y=0;y<baris;y++){
+                for(var x=0;x<kolom;x++){
+                    ctx.beginPath();
+                    ctx.arc(grid[x][y].x, grid[x][y].y, radius, 0, Math.PI * 2, false);
+                    ctx.fillStyle = 'red';
+                    ctx.fill();
+                    ctx.closePath();
+                }
+            }
+            //menggambar grid
+            for(var y=0;y<baris;y++){
+                for(var x=0;x<kolom;x++){
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(grid[x][y].x-(0.5*spacing), grid[x][y].y-(0.5*spacing), spacing, spacing);
+                    ctx.strokeStyle = 'blue';
+                    ctx.stroke();
+                    ctx.fillStyle = 'black';
+                    ctx.font = "10px Arial";
+                    ctx.fillText(grid[x][y].x + ", " + grid[x][y].y, grid[x][y].x, grid[x][y].y);
+                    ctx.font = "12px Arial";
+                    ctx.fillText(x + ", " + y, grid[x][y].x-(0.5*spacing), grid[x][y].y-(0.5*spacing)+10);
+                    ctx.restore();
+                }
+            }
+            /*-- background selesai --*/
+
+            /* menggambar objek dinamisnya */
+            /* -- Menggambar Bola -- */
+            ctx.save();
+            //rekalkulasi koordinat
+            bola.x = bola.x + 0*Math.cos(bola.sudut * Math.PI)-bola.offset*Math.sin(bola.sudut * Math.PI);
+            bola.y = bola.y + 0*Math.sin(bola.sudut * Math.PI)+bola.offset*Math.cos(bola.sudut * Math.PI);
+            //translasikan koordinat objek
+            ctx.translate(bola.x, bola.y);
+            //rotasikan hadap objek	
+            ctx.rotate(bola.sudut * Math.PI);	
+            /* digambar bolanya */
+            ctx.beginPath();
+            ctx.arc(0,0,bola.jarijari,0,2*Math.PI, false);
+            ctx.closePath();
+            ctx.fillStyle = bola.warna;
+            ctx.fill();
+            /* digambar cucuknya */
+            ctx.beginPath();
+            ctx.moveTo(0,-bola.jarijari);
+            ctx.lineTo(+10,-10);
+            ctx.lineTo(-10,-10);
+            ctx.closePath();
+            ctx.fillStyle = "#ffff00";
+            ctx.strokeStyle="#666666";
+            ctx.stroke();
+            ctx.fill();
+            ctx.restore();
+            /*-- Bola selesai --*/
+            //tampilkan kecepatan dan sudut
+            ctx.fillStyle = "#000000";
+            ctx.font = "14px Arial";
+            ctx.fillText("Offset: "+bola.offset, textX, 80);
+            ctx.fillText("Sudut: "+bola.sudut.toFixed(2), textX, 100);
+            ctx.fillText("Koord: "+bola.x.toFixed(2)+", "+bola.y.toFixed(2), textX, 120);
+            ctx.fillText("Grid: "+bola.x_grid+", "+bola.y_grid, textX, 140);
+            ctx.fillText("GridT: "+bola.x_grid_tujuan+", "+bola.y_grid_tujuan, textX, 160);
+            ctx.fillText("KoordG: "+grid[bola.x_grid][bola.y_grid].x+", "+grid[bola.x_grid][bola.y_grid].y, textX, 200);
+            ctx.fillText("KoordGT: "+grid[bola.x_grid_tujuan][bola.y_grid_tujuan].x+", "+grid[bola.x_grid_tujuan][bola.y_grid_tujuan].y, textX, 220);
+            x_real_tujuan = grid[bola.x_grid_tujuan][bola.y_grid_tujuan].x;
+            y_real_tujuan = grid[bola.x_grid_tujuan][bola.y_grid_tujuan].y;
+            ctx.fillText("Jarak: "+euDist(bola.x,bola.y,x_real_tujuan,y_real_tujuan).toFixed(2), textX, 180);
+
+            //stopper bola panggil (klik datang)
+            //hitung koordinat real untuk regitrasi
+            x_real_tujuan = grid[bola.x_grid_tujuan][bola.y_grid_tujuan].x;
+            y_real_tujuan = grid[bola.x_grid_tujuan][bola.y_grid_tujuan].y;
+            if(euDist(bola.x,bola.y,x_real_tujuan,y_real_tujuan)<=radius_reg){
+                bola.offset = 0;		//offset dinolkan
+                bola.seek = false;		//beritahu mode seek tidak aktif
+                //update koordinat grid bola deangan koordinat grid tujuan
+                bola.x_grid = bola.x_grid_tujuan;
+                bola.y_grid = bola.y_grid_tujuan;
+            }
+        }
+        setInterval(gambarkan, 20);
+    </script>
+</body>
+</html>

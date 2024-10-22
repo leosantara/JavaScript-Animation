@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+<canvas id="myCanvas" width="200" height="100" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML canvas tag.</canvas>
+
+<script>
+// var c = document.getElementById("myCanvas");
+// var ctx = c.getContext("2d");
+// ctx.beginPath();
+// ctx.arc(95,50,40,1,0);
+// ball = new Ball(10,0x00ff00);
+// angle = 0;
+// radius = 1
+// ctx.stroke();
+var canvas = document.getElementById('mycanvas'),
+context = canvas.getContext('2d'),
+ball = new Ball(10, 0x00ff00),
+angel = 0,
+radius = 1;
+
+
+function drawFrame(){
+    window.requestAnimationFrame(drawFrame, canvas)
+    ctx.y = canvas.height/2 + Radius * Math.sin(angle);
+    ctx.x = canvas.height/2 + Radius * Math.cos(angle);
+    angle += 0.1;
+    radius = angle*Math.sin(angle);
+    ball.draw(context);
+}
+</script> 
+
+</html>
+

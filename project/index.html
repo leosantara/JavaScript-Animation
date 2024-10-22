@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROJECT</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="myCanvas" width="600" height="500" style="border:1px solid #000000;"></canvas>
+    <textarea id="log"></textarea>
+    <script src="utils.js"></script>
+    <script src="plane.js"></script>
+    <script src="bullets.js"></script>
+    <script src="alien.js"></script>
+    <script src="meteor.js"></script>
+    <script src="life.js"></script>
+    <script src="ufo.js"></script>
+    <script src="ufoShoot.js"></script>
+    <script src="boss.js"></script>
+    <script>
+        
+        var canvas = document.getElementById("myCanvas"),
+            context = canvas.getContext('2d'),
+            mouse=utils.captureMouse(canvas),
+            myplane = new Plane('plane1.png', 0.2);
+            easing = 0.05;
+            bullets=[];
+            aliens=[];
+            aliens2=[];
+            boss = new Boss('boss.gif',0.5);
+            meteors=[];
+            ufoBullets=[];
+            life = 1,
+            tile = 50;
+            initialColumn = 4;
+            initialRow = 2;
+            column = initialColumn;
+            row = initialRow;
+            gameOver = false,
+            level = 1;
+            maxLevel = 6,
+            gameState = 'start',
+            heartImage = new Image(),
+            heartImage.src = 'life.png';
+            alienRotationSpeed = 0.02;
+            alienInterval = null;
+            maxAliens = 20; // Batas jumlah alien yang diinginkan
+            alienCount = 0; // Counter untuk jumlah alien yang muncul
+            ufo = null;
+            bossHealth = 50;
+            powerBullet = 2;
+
+            heartImage.onload = function() {
+            // Start the game once the heart image is loaded
+            drawFrame();
+            };
+
+            myplane.x = canvas.width /2;
+            myplane.y = canvas.height - 100;
+
+            // if(myplane.x + myplane.width >= canvas.width || myplane.x <= 0){
+            //     myplane.vx *= 0;
+            //     myplane.x += myplane.vx;
+            // }
+            // if(myplane.y + myplane.height >= canvas.height || myplane.y <= 0){
+            //     myplane.vy *= -1;
+            //     myplane.y += myplane.vy;
+            // }
+        
+
+     // Panggil keyboardControls function from utils.js
+        keyboardControl();
+
+
+        function shoot() {
+            // x1 = myplane.x + (myplane.width/2);            
+            // y1 = myplane.y;
+            // x2 = myplane.x + (myplane.width/2);            
+            // y2 = myplane.y+10;
+            // bullet = new Line(x1,y1,x2,y2, "#FFFFFF"); 
+            x1 = myplane.x + (myplane.width/2);            
+                y1 = myplane.y;
+                x2 = myplane.x + (myplane.width/2);            
+                y2 = myplane.y+10;
+                // bullet = new Line(x1,y1,x2,y2, "#FFFFFF"); 
+                bullet = new Bola(5,"#FFFFFF");
+                bullet.x = x1 = myplane.x + (myplane.width/2);
+                bullet.y = myplane.y;
+                bullet.vx = 0; 
+                bullet.vy = -2;
+                bullets.push(bullet);
+                if (powerBullet > 0) {
+                    var bullet2 = new Bola(5,"#FFFFFF");
+                    bullet.x = x1 = myplane.x + (myplane.width/2) - 10;
+                    bullet2.vx = 0;
+                    bullet2.vy = -2;
+                    bullet2.x = myplane.x + (myplane.width/2) + 10;
+                    bullet2.y = myplane.y;
+                    bullets.push(bullet2);
+                }
+                if (powerBullet > 1) {
+                    var bullet3 = new Bola(5,"#FFFFFF");
+                    var bullet4 = new Bola(5,"#FFFFFF");
+                    bullet3.vx = 4;
+                    bullet3.vy = -2.0;
+                    bullet3.x = myplane.x + (myplane.width/2) + 13
+                    bullet3.y = myplane.y;
+                    bullets.push(bullet3);
+                    bullet4.vx = -4;
+                    bullet4.vy = -2.0;
+                    bullet4.x = myplane.x + (myplane.width/2) - 13
+                    bullet4.y = myplane.y;
+                    bullets.push(bullet4);
+                }
+        }
+
+        function createAlien(){
+            aliens = [];
+            if(level <=4){
+                for(var i = 0; i < column; i++){
+                    for(var j = 0; j < row ; j++){
+                        alien = new Alien('alien.png',0.15); 
+                        alien.x = tile + i*tile;            
+                        alien.y = tile + j*tile;
+                        alien.vx = 1; 
+                        alien.vy = 1;
+                        alien.alive =  true;
+                        aliens.push(alien);
+                    }
+                }
+            }
+            else{
+                if (alienInterval) clearInterval(alienInterval);
+                alienInterval = setInterval(() => {
+                    if (alienCount < maxAliens) {
+                        alien = new Alien('alien2.png', 0.04);
+                        alien.x = Math.random() * canvas.width;
+                        alien.y = Math.random() * canvas.height / 2;
+                        alien.radius = Math.random() * 100 + 100; // Jarak dari pusat rotasi (myplane)
+                        alien.angle = Math.random() * Math.PI * 2; // Sudut awal
+                        alien.rotationSpeed = alienRotationSpeed;
+                        alien.alive = true;
+                        aliens.push(alien);
+                        alienCount++;
+                    } else {
+                        clearInterval(alienInterval);
+                        alienInterval = null;
+                    }
+                }, 1000);
+            }
+
+        }
+        
+        function createMeteor() {
+            meteor = new Meteor('meteor.png',0.2);
+            meteor.x = Math.random() * canvas.width;;
+            meteor.y = 0;
+            meteor.vx = (Math.random() - 0.5) * 2;
+            meteor.vy = 2 + Math.random() * 3;
+            meteors.push(meteor);
+        }
+
+        function createBoss() {
+            boss = new Boss('boss.gif',0.5);
+            boss.x = 0;
+            boss.y = 25;
+            boss.vx = 2;
+            boss.vy = 0;
+
+        }
+
+        function drawBoss(){
+            boss.x += boss.vx;
+            boss.y += boss.vy;
+            if(boss.x + boss.width >= canvas.width || boss.x <= 0){
+                boss.vx *= -1;
+                boss.x += boss.vx;
+            }
+            if(boss.y + boss.height >= canvas.height || boss.y <= 0){
+                boss.vy *= -1;
+                boss.y += boss.vy;
+            }
+            boss.draw(context)
+        }
+        
+        function createBossLiveBar() {
+            liveBar = {
+                x: 10,
+                y: 450,
+                width: 30,
+                height: -400,
+                maxHeight: 400,
+                color: '#FF0000'
+            };
+        }
+
+        function drawBossLiveBar() {
+            context.fillStyle = liveBar.color;
+            context.fillRect(liveBar.x, liveBar.y, liveBar.width, liveBar.height);
+        }
+
+
+
+        function resetGame(){
+            bullets = [];
+            aliens = [];
+            meteors = [];
+            ufoBullets = [];
+            level = 1;
+            column = initialColumn;
+            row = initialRow;
+            life = 1;
+            bossHealth = 50;
+            gameOver = false;
+            gameState = 'playing';
+            myplane = new Plane('plane1.png', 0.2);
+            myplane.x = canvas.width /2;
+            myplane.y = canvas.height - 100;
+            createAlien();
+            myplane.x = canvas.width / 2;
+            myplane.y = 400;
+            ufo = null;
+        }
+
+        function drawAlien(){
+            for(var i =0; i < aliens.length; i++){
+                alien = aliens[i];
+                if(alien.alive){
+                    if(level <= 4){
+                        alien.x += alien.vx;
+                        alien.x += alien.vx;
+                
+                        if(alien.x + alien.width >= canvas.width || alien.x <= 0){
+                            alien.vx *= -1;
+                            alien.x += alien.vx;
+
+                            for(var j = 0; j < aliens.length; j++){
+                                aliens[j].y += alien.vy;
+                
+                            }
+                        }
+
+                        if (alien.y >= myplane.y) {
+                            gameOver = true;
+                            gameState = 'gameOver';
+                            aliens.splice(0, aliens.length);
+                        }
+
+                        var distX = Math.abs(myplane.x - alien.x - alien.width / 2);
+                        var distY = Math.abs(myplane.y - alien.y - alien.height / 2);
+                        if(distX <= (alien.width / 2 + myplane.radius) && distY <= (alien.height / 2 + myplane.radius)){
+                            gameOver = true;
+                            gameState = 'gameOver';
+                            aliens.splice(0, aliens.length);
+                        }
+                        
+                        } else {
+                        alien.angle += alien.rotationSpeed;
+                        alien.x = myplane.x + alien.radius * Math.cos(alien.angle);
+                        alien.y = myplane.y + alien.radius * Math.sin(alien.angle);
+                    }
+                    alien.draw(context);
+                }
+            }
+        }
+
+
+        function hitBoss(){
+            for (var i = 0; i < bullets.length; i++){
+                bullet = bullets[i];
+            
+                var distX = Math.abs(bullet.x - boss.x - boss.width / 2);
+                var distY = Math.abs(bullet.y - boss.y - boss.height / 2);
+                if(distX <= (boss.width / 2 + bullet.radius) && distY <= (boss.height / 2 + bullet.radius)){
+                    bullet.used = true;
+                    bossHealth -= 1
+                    
+                    if (bossHealth == 0){
+                        log.value = "YOU WIN";
+                        gameOver = false;
+                        gameState = 'win';
+                    }
+                    console.log(bossHealth)
+                    liveBar.height += liveBar.maxHeight / 50;
+                    bullets.splice(i,1);
+                    break
+                }
+                
+            }
+        }
+
+
+        function hitAlien(){
+            for (var i = 0; i < bullets.length; i++){
+                bullet = bullets[i];
+                for (var j = 0; j < aliens.length; j++){
+                    alien = aliens[j]; 
+                    // var bulletY = (bullet.y1 - bullet.y2)/2;
+                    var distX = Math.abs(bullet.x - alien.x - alien.width / 2);
+                    var distY = Math.abs(bullet.y - alien.y - alien.height / 2);
+                    if(distX <= (alien.width / 2 + bullet.radius) && distY <= (alien.height / 2 + bullet.radius)){
+                        bullet.used = true;
+                        alien.alive = false;
+                        bullets.splice(i,1);
+                        aliens.splice(j,1);
+                        break
+                    }
+                    // if (!bullet.used && alien.alive && detectCollision(bullet, alien)) {
+                    //     bullet.used = true;
+                    //     alien.alive = false;
+                    //     bullets.splice(i,1);
+                    //     aliens.splice(j,1);
+                    //     break
+                    // }else{
+                    //     console.log(false)
+                    // }
+
+                }
+            }
+        }
+
+        function hitMeteor() {
+            for (var i = 0; i < meteors.length; i++) {
+                var meteor = meteors[i];
+                var distX = Math.abs(myplane.x - meteor.x - meteor.width / 2);
+                var distY = Math.abs(myplane.y - meteor.y - meteor.height / 2);
+                if (distX + 5 <= (meteor.width / 2 + myplane.width / 2) && distY + 5 <= (meteor.height / 2 + myplane.height / 2)){
+                    life -= 1;
+                    meteors.splice(i,1)
+                    if(life <= 0){
+                        gameOver = true;
+                        gameState = 'gameOver';
+                        aliens.splice(0, aliens.length);
+                        break;
+                    }
+                }
+            }
+        }
+
+        function createUfo(){
+            ufo = new Ufo('ufo.png',1);
+            ufo.alive = true;
+            setInterval(() => {
+                if (ufo && ufo.alive) {
+                    var bullet = new UfoShoot(ufo.x + ufo.width / 2, ufo.y + ufo.height);
+                    ufoBullets.push(bullet);
+                }
+            }, 5000);
+        }
+
+        function drawUFO() {
+            if (ufo && ufo.alive) {
+                ufo.x += ufo.vx;
+                ufo.y += ufo.vy;
+                if (ufo.x + ufo.width >= canvas.width || ufo.x <= 0) {
+                    ufo.vx *= -1;
+                }
+                if (ufo.y + ufo.height >= canvas.height / 2 || ufo.y <= 0) {
+                    ufo.vy *= -1;
+                }
+                ufo.draw(context);
+            }
+        }
+
+        function hitUfo() {
+            if (ufo && ufo.alive){
+                for (var i = 0; i < bullets.length; i++) {
+                var bullet = bullets[i];
+                var distX = Math.abs(bullet.x - ufo.x - ufo.width / 2);
+                var distY = Math.abs(bullet.y - ufo.y - ufo.height / 2);
+                if (distX <= (ufo.width / 2 + bullet.radius) && distY <= (ufo.height / 2 + bullet.radius)) {
+                    bullet.used = true;
+                    bullets.splice(i, 1);
+                    ufo.hitCount += 1;
+                    if (ufo.hitCount >= 10) {
+                        ufo.alive = false;
+                    }
+                    break;
+                }
+            }
+            }
+        }
+
+        function hitPlane() {
+            for (var i = 0; i < ufoBullets.length; i++) {
+                var bullet = ufoBullets[i];
+                var distX = Math.abs(bullet.x - myplane.x - myplane.width / 2);
+                var distY = Math.abs(bullet.y - myplane.y - myplane.height / 2);
+                if (distX <= (myplane.width / 2 + bullet.radius) && distY <= (myplane.height / 2 + bullet.radius)) {
+                    life -= 1;
+                    ufoBullets.splice(i, 1);
+                    if (life <= 0) {
+                        gameOver = true;
+                        gameState = 'gameOver';
+                        aliens.splice(0, aliens.length);
+                        break;
+                    }
+                }
+            }
+        }
+
+        function nextLevel(){
+            if(aliens.length == 0 && (!ufo || !ufo.alive) && alienInterval === null){
+                bullets.splice(0,bullets.length);
+                if (level < maxLevel){
+                    level ++;
+                    column += 1;
+                    row += 1;
+                    alien.vx += 0.5;
+                    if (level <= 4) {
+                        createAlien();
+                    } else {
+                        if (alienInterval) clearInterval(alienInterval);
+                        createAlien();
+                        alienCount = 0;
+                    }
+                    if (level > 2 && level <= 4){
+                        myplane = new Plane('plane2.png', 0.2);
+                        myplane.x = canvas.width /2;
+                        myplane.y = canvas.height - 100;
+                        life = 2;
+                    }else if (level > 4){
+                        myplane = new Plane('plane3.png', 0.2);
+                        myplane.x = canvas.width /2;
+                        myplane.y = canvas.height - 100;
+                        life = 3;
+                    }
+                    if (level >= 3){
+                        createUfo();
+                    }
+                } else if (bossHealth == 0){
+                    log.value = "YOU WIN";
+                    gameOver = false;
+                    gameState = 'win';
+                }
+            }
+        }
+        // function isGameOver() {
+        //     if(gameState === 'gameOver') {
+        //         log.value = 'GAME OVER. Press SPACE to restart.';
+        //     }
+        // }
+
+        function drawStartScreen() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.fillStyle = "#FFFFFF";
+            context.font = "bold 30px Consolas";
+            context.textAlign = "center";
+            context.fillText("Attack On Space", canvas.width / 2, canvas.height / 2 -25);
+            context.fillText("Press Space to Start", canvas.width / 2, canvas.height / 2 + 25);
+        }
+
+        function drawGameOverScreen() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.fillStyle = "#FFFFFF";
+            context.font = "bold 30px Consolas";
+            context.textAlign = "center";
+            context.fillText("Game Over", canvas.width / 2, canvas.height / 2 - 30);
+            context.fillText("Press Enter to Restart", canvas.width / 2, canvas.height / 2 + 10);
+        }
+
+        function drawWinScreen() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.fillStyle = "#FFFFFF";
+            context.font = "bold 30px Consolas";
+            context.textAlign = "center";
+            context.fillText("You Win", canvas.width / 2, canvas.height / 2 - 30);
+            context.fillText("Press Enter to Restart", canvas.width / 2, canvas.height / 2 + 10);
+        }
+
+        function drawLevel() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.fillStyle = "#FFFFFF";
+            context.font = "bold 20px Consolas";
+            context.textAlign = "left";
+            context.fillText("Level : "+level, 20, 20);
+        }
+
+        function drawLives() {
+            for (var i = 0; i < life; i++) {
+                context.drawImage(heartImage, 500 + (i * 30), 10, 25, 25);
+            }
+        }
+
+        function draw(bullet){
+            bullet.x += bullet.vx;
+            bullet.y += bullet.vy;
+            bullet.draw(context)
+        }
+
+        function drawMeteor(meteor) {
+            meteor.x += meteor.vx;
+            meteor.y += meteor.vy;
+            if(meteor.x > canvas.width | meteor.y > canvas.height){
+            meteors.splice[meteor,1]
+            }
+            meteor.draw(context); 
+        }
+
+
+        document.addEventListener('keyup', function(event) {
+            if (event.key === ' ') { // Tombol spasi untuk menembak atau memulai ulang
+                if(gameState === 'start') {
+                    gameState = 'playing';
+                    log.value = '';
+                    createAlien();
+                    setInterval(createMeteor, 3000);
+                    createBoss()
+                    createBossLiveBar()
+
+                } else if(gameState === 'playing') {
+                    shoot();
+                }
+            }
+            if (event.key === 'Enter') { // Tab key to restart from win screen
+                if (gameState === 'win') {
+                    gameState = 'start';
+                    resetGame();
+                    log.value = 'Press SPACE to start';
+                }
+                else if(gameState === 'gameOver') {
+                    gameState = 'start';
+                    resetGame();
+                    log.value = 'Press SPACE to start';
+            }}
+        });
+
+        function drawFrame(){
+            window.requestAnimationFrame(drawFrame, canvas);
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (gameState === 'start') {
+                drawStartScreen();
+            } else if (gameState === 'playing') {
+                drawLevel();
+                drawLives();
+                if(level >= 2){
+                    meteors.forEach(drawMeteor);
+                    hitMeteor();
+                }
+                if(level <= 4){
+                    myplane.vx = ax;
+                    myplane.vy = ay;
+                    myplane.x += myplane.vx;
+                    myplane.y += myplane.vy;
+                    myplane.draw(context);
+                }
+                if(level > 4){
+                    
+                    kecepatan = 3;
+                    var dx=mouse.x - myplane.x,
+                        dy=mouse.y - myplane.y,
+                        angle=Math.atan2(dy,dx);
+
+                    myplane.vx=kecepatan*Math.cos(angle);
+                    myplane.vy=kecepatan*Math.sin(angle);
+                    myplane.x +=myplane.vx;
+                    myplane.y +=myplane.vy;
+                    myplane.draw(context);
+                }
+                if(level == 6){
+                    drawBoss();
+                    hitBoss();
+                    drawBossLiveBar();
+                }
+                myplane.vx = ax;
+                myplane.vy = ay;
+                myplane.x += myplane.vx;
+                myplane.y += myplane.vy;
+                bullets.forEach(draw);
+                ufoBullets.forEach(bullet => {
+                    bullet.update();
+                    bullet.draw(context);
+                });
+
+                nextLevel();
+                drawAlien();
+                if (ufo && ufo.alive){
+                    drawUFO();
+                    hitUfo();
+                }
+                
+                hitAlien();   
+                hitPlane();
+                
+            } else if (gameState === 'gameOver') {
+                drawGameOverScreen();
+            } else if (gameState === 'win') {
+                drawWinScreen();
+            }
+        };
+        if (heartImage.complete) {
+            drawFrame();
+        } else {
+            heartImage.onload = drawFrame;
+        }
+        
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<canvas id="canvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+<textarea id="log"></textarea>
+
+<script src="bola.js"></script>
+<script src="utils.js"></script>
+<script>
+
+    window.onload = function () {
+        var canvas = document.getElementById('canvas'),
+            context = canvas.getContext('2d'),
+            mouse = utils.captureMouse(canvas),
+            log = document.getElementById('log'),
+            ballA = new Bola(30, "#ff0000"),
+            ballB = new Bola(30, "#ff0000");
+            // bolaG = new Bola(15, 0x00ff00);
+            // bolaB = new Bola(15, 0x0000ff);
+            bolaTarget = new Bola(10, 0x00ff00),
+            bolaG = new Bola(20, "#00ff00"),
+            easing = 0.04;
+
+
+        ballA.x = canvas.width / 2;
+        ballA.y = canvas.height / 2;
+        
+
+        canvas.addEventListener('mousemove', drawFrame, false);
+        drawFrame();
+        bolaTarget.x = canvas.width / 2;
+        bolaTarget.y = canvas.height * 0.8;
+
+        // function rantai(bola, targetX, targetY) {
+        //     bola.ax = (targetX - bola.x) * spring;
+        //     bola.ay = (targetY - bola.y) * spring;
+        //     bola.vx += bola.ax;
+        //     bola.vy += bola.ay;
+        //     bola.vy += gravitasi;
+        //     bola.vx *= friksi;
+        //     bola.vy *= friksi;
+        //     bola.x += bola.vx;
+        //     bola.y += bola.vy;
+        // }
+
+        function drawFrame() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            ballB.x = mouse.x;
+            ballB.y = mouse.y;
+
+            var dx = ballB.x - ballA.x,
+                dy = ballB.y - ballA.y,
+                dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 60) {
+                log.value = "Hit!";
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.fillStyle = "white";
+                context.font = "bold 50px Arial";
+                context.strokeText("Game Over", (canvas.width / 2)-130, (canvas.height / 2));
+                // bolaG.x = 0;
+                // bolaG.y = canvas.height * 0.8;
+                // bolaG.vx = (bolaTarget.x - bolaG.x) * easing;
+                // bolaG.vy = (bolaTarget.y - bolaG.y) * easing;
+                // bolaG.x += bolaG.vx;
+                // bolaG.y += bolaG.vy;
+            } else {
+                // rantai(ballA, bolaG.x, bolaG.y);
+                // rantai(ballB, mouse.x, mouse.y);
+                // rantai(bolaR, ballB.x, ballB.y);
+                // rantai(bolaB, bolaR.x, bolaR.y);
+                // rantai(bolaG, bolaB.x, bolaB.y);
+                // context.beginPath();
+                // context.moveTo(mouse.x, mouse.y);
+                // context.lineTo(bolaR.x, bolaR.y);
+                // context.lineTo(bolaB.x, bolaB.y);
+                // context.lineTo(bolaG.x, bolaG.y);
+                // context.lineTo(ballA.x, ballA.y);
+                // context.lineTo(ballB.x, ballB.y);
+                // context.stroke();
+                log.value = '';
+                ballA.draw(context);
+                ballB.draw(context);
+                // bolaB.draw(context);
+                // bolaG.draw(context);
+            }
+
+        }
+    };
+
+
+</script>

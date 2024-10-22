@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bola Bolak-balik dengan Perubahan Sudut</title>
+    <style>
+        canvas {
+            border: 1px solid #d3d3d3;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="myCanvas" width="2000" height="2000"></canvas>
+
+<script>
+    var canvas = document.getElementById("myCanvas");
+    var ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#00ff00";
+
+    var ball = {
+        x: 100, // posisi awal x
+        y: canvas.height / 2, // posisi awal y
+        radius: 10, // radius bola
+        angle: 0, // sudut awal
+        direction: 1 // arah pergerakan (1 = ke kanan, -1 = ke kiri)
+    };
+
+    var isTurning = false; // menandakan apakah bola sedang berputar
+
+    function drawBall() {
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    function moveBall() {
+        // Pergerakan lurus
+        if (!isTurning) {
+            ball.x += 1 * ball.direction;
+        } else { // Pergerakan miring
+            ball.x += 1 * ball.direction * Math.cos(ball.angle);
+            ball.y += 1 * Math.sin(ball.angle);
+        }
+
+        // Cek apakah bola sudah cukup jauh untuk berputar
+        if (ball.x >= 300 && !isTurning) {
+            isTurning = true;
+            ball.angle = Math.PI / 10; // Sudut miring
+        }
+
+        // Jika bola melewati batas, balik arah
+        if (ball.x >= canvas.width/2 - ball.radius || ball.x <= ball.radius) {
+            ball.direction *= -1;
+        }
+    }
+
+    function drawFrame() {
+        drawBall();
+        moveBall();
+        requestAnimationFrame(drawFrame);
+    }
+
+    drawFrame();
+</script>
+
+</body>
+</html>

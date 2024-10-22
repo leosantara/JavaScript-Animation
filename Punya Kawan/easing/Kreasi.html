@@ -1,0 +1,95 @@
+<canvas id="canvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+<textarea id="log"></textarea>
+
+<script src="bola.js"></script>
+<script src="utils.js"></script>
+<script>
+    window.onload = function () {
+        var canvas = document.getElementById('canvas'),
+            context = canvas.getContext('2d'),
+            mouse = utils.captureMouse(canvas);
+            bolaR = new Bola(15, "#red");
+            bolaG = new Bola(15, 0x00ff00);
+            bolaB = new Bola(15, 0x0000ff);
+            bolaA = new Bola(15, 0x0000ff);
+            bolaTarget = new Bola(10, 0x00ff00);
+            spring = 0.05;
+            friksi = 0.9;
+        mouseDitekan = false;
+        gravitasi = 7;
+        bolaR.x = 0;
+        easing = 0.04;
+        bolaR.y = canvas.height / 2;
+        function rantai(bola, targetX, targetY) {
+            bola.ax = (targetX - bola.x) * spring;
+            bola.ay = (targetY - bola.y) * spring;
+            bola.vx += bola.ax;
+            bola.vy += bola.ay;
+            bola.vy += gravitasi;
+            bola.vx *= friksi;
+            bola.vy *= friksi;
+            bola.x += bola.vx;
+            bola.y += bola.vy;
+        }
+        canvas.addEventListener('mousedown', function () {
+            if (bolaG.x > utils.containsPoint(bolaG.getBounds(), mouse.x, mouse.y)) {
+                mouseDitekan = true;
+                canvas.addEventListener('mouseup', onMouseUp, false);
+                canvas.addEventListener('mousemove', onMouseMove, false);
+            }
+        }, false);
+        canvas.addEventListener('click', function () {
+            mouseDiclick = true;
+        }, false);
+        function onMouseUp() {
+            mouseDitekan = false;
+            canvas.removeEventListener('mouseup', onMouseUp, false);
+            canvas.removeEventListener('mousemove', onMouseMove, false);
+        }
+        function onMouseMove() {
+            bolaTarget.x = mouse.x;
+            bolaTarget.y = mouse.y;
+        }
+        (function drawFrame() {
+
+            window.requestAnimationFrame(drawFrame, canvas);
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            rantai(bolaR, mouse.x, mouse.y);
+            rantai(bolaB, bolaR.x, bolaR.y);
+            rantai(bolaG, bolaB.x, bolaB.y);
+            //draw rantai
+            context.beginPath();
+            context.moveTo(mouse.x, mouse.y);
+            context.lineTo(bolaR.x, bolaR.y);
+            context.lineTo(bolaB.x, bolaB.y);
+            context.lineTo(bolaG.x, bolaG.y);
+            context.stroke();
+            bolaR.draw(context);
+            bolaB.draw(context);
+            bolaG.draw(context);
+            // bolaG.vx = (bolaTarget.x - bolaG.x) * easing;
+            // bolaG.vy = (bolaTarget.y - bolaG.y) * easing;
+            // bolaG.x += bolaG.vx;
+            // bolaG.y += bolaG.vy;
+            log.value = "bola.vx= " + bolaG.vx;
+            bolaG.draw(context);
+            if (mouseDiclick) {
+                bolaTarget.x = mouse.x;
+                bolaTarget.y = mouse.y;
+                mouseDiclick = false;
+            };
+            if (!mouseDitekan) {
+                bolaA.vx = (bolaTarget.x - bolaA.x) * easing;
+                bolaA.vy = (bolaTarget.y - bolaA.y) * easing;
+                bolaA.x += bolaA.vx;
+                bolaA.y += bolaA.vy;
+                bolaG.radius +=0.2;
+                bolaA.radius += 0.2;
+                bolaG.draw(context);
+                bolaA.draw(context);
+                bolaTarget.draw(context);
+            };
+        }());
+    };
+
+</script>

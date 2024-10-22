@@ -1,0 +1,23 @@
+body{
+    background-color: black;
+}
+
+textarea{
+    background-color: black;
+    border: black;
+}
+
+#myCanvas{
+    background-image: url('bg3.png');
+    margin: 10px;
+    padding: 10px;
+    border: double #0000ff;
+    position: absolute;
+    top:0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin:auto;
+  
+}
+
